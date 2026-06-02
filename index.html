@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="単語テスト">
+<link rel="apple-touch-icon" href="icon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>単語練習アプリ</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 550px;
+            box-sizing: border-box;
+        }
+        h1 { color: #333; margin-top: 0; font-size: 24px; }
+        
+        /* 画面の表示・非表示コントロール */
+        .screen { display: none; }
+        
+        /* タイマー表示 */
+        .timer-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .timer-bar {
+            width: 70px; height: 8px; background-color: #e0e0e0;
+            border-radius: 4px; overflow: hidden;
+        }
+        .timer-progress {
+            width: 100%; height: 100%; background-color: #ea4335;
+        }
+        .timer-text { font-size: 13px; color: #666; margin-top: 2px; text-align: left; }
+
+        /* 入力エリア（iPadのキーボード対策） */
+        .form-group { margin-bottom: 12px; text-align: left; width: 85%; margin-left: auto; margin-right: auto; }
+        .form-group label { font-size: 14px; color: #555; font-weight: bold; display: block; margin-bottom: 4px; }
+        input[type="text"], input[type="number"] {
+            width: 100%; padding: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+        
+        .primary-btn {
+            background-color: #1a73e8; color: white; border: none;
+            padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px;
+            cursor: pointer; margin-top: 15px; width: 85%;
+            -webkit-appearance: none;
+        }
+        
+        /* クイズエリア */
+        .word-area {
+            display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0;
+        }
+        .word { font-size: 38px; font-weight: bold; color: #1a73e8; word-break: break-all; }
+        
+        .audio-btn {
+            background-color: #f1f3f4; border: none; font-size: 24px; cursor: pointer;
+            border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* 選択肢 2×2列（iPadのタッチ用に最適化） */
+        .choices {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
+        }
+        .choice-btn {
+            background-color: #ffffff; border: 2px solid #dadce0; border-radius: 12px;
+            padding: 20px 10px; font-size: 18px; font-weight: bold; cursor: pointer; 
+            text-align: center; min-height: 80px; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: center;
+            -webkit-appearance: none; -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* 正解・不正解の装飾 */
+        .choice-btn.correct-choice { background-color: #e6f4ea !important; border-color: #34a853 !important; color: #137333 !important; }
+        .choice-btn.wrong-choice { background-color: #fce8e6 !important; border-color: #ea4335 !important; color: #c5221f !important; }
+
+        .result-msg { font-size: 32px; font-weight: bold; margin: 15px 0; min-height: 40px; }
+        .right { color: #34a853; }
+        .wrong { color: #ea4335; }
+        
+        /* 結果エリア */
+        .score-display { font-size: 44px; font-weight: bold; color: #333; margin: 15px 0; }
+        .perfect-record {
+            background-color: #e6f4ea; border: 2px solid #34a853; color: #137333;
+            padding: 15px; border-radius: 8px; text-align: left; margin-top: 15px; font-size: 15px;
+        }
+        .perfect-title { font-size: 28px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #1b5e20; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="screen-login" class="screen" style="display: block;">
+        <h1>📝 単語テスト</h1>
+        <div class="form-group">
+            <label>クラス</label>
+            <input type="text" id="user-class" placeholder="例: 1年A組">
+        </div>
+        <div class="form-group">
+            <label>出席番号</label>
+            <input type="number" id="user-number" placeholder="例: 15">
+        </div>
+        <div class="form-group">
+            <label>名前</label>
+            <input type="text" id="user-name" placeholder="例: 山田太郎">
+        </div>
+        <button class="primary-btn" onclick="submitProfile()">テストを始める</button>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="timer-container">
+            <div id="quiz-timer-container">
+                <div class="timer-bar"><div id="timer-progress" class="timer-progress"></div></div>
+                <div class="timer-text"><span id="timer-sec">5.0</span>秒</div>
+            </div>
+            <div id="quiz-progress" style="color: #666; font-weight: bold;"></div>
+        </div>
+        <div class="word-area">
+            <div class="word" id="question-word">English</div>
+            <button class="audio-btn" onclick="speakCurrentWord()">🔊</button>
+        </div>
+        <div class="choices" id="choices-container"></div>
+        <div class="result-msg" id="result-message"></div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <h1>🏁 テスト終了</h1>
+        <div class="score-display" id="score-text">0%</div>
+        
+        <div id="perfect-area" style="display: none;">
+            <div class="perfect-title">🎉 100% 🎉</div>
+            <div class="perfect-record">
+                <p><strong>やった回数:</strong> <span id="record-count"></span> 回目</p>
+                <p><strong>達成時間:</strong> <span id="record-time"></span></p>
+                <p><strong>クラス:</strong> <span id="record-class"></span></p>
+                <p><strong>番号:</strong> <span id="record-number"></span>番</p>
+                <p><strong>名前:</strong> <span id="record-name"></span></p>
+            </div>
+        </div>
+        
+        <button class="primary-btn" onclick="restartQuiz()">もう一度挑戦する</button>
+    </div>
+</div>
+
+<script>
+    // ↓↓↓ 【先生用】ここにエクセルのデータを貼り付けてください ↓↓↓
+    const defaultCSVData = `
+apple,りんご
+banana,バナナ
+orange,オレンジ
+grape,ぶどう
+`; // ↑↑↑ データの最後の行までここに挟んでください ↑↑↑
+
+    let userProfile = { class: '', number: '', name: '' };
+    let originalList = [];
+    let quizQueue = [];
+    let allJapaneseAnswers = [];
+    
+    let currentWordIndex = 0;
+    let correctCount = 0;
+    let attemptCount = 0;
+
+    let timeLimit = 5000;
+    let timeLeft = 5000;
+    let timerInterval = null;
+    let autoNextTimeout = null;
+    let isAnswered = false;
+
+    window.onload = function() {
+        parseEmbeddedData(defaultCSVData);
+    };
+
+    function parseEmbeddedData(text) {
+        var lines = text.split(/\r?\n/);
+        originalList = [];
+        allJapaneseAnswers = [];
+
+        for (var i = 0; i < lines.length; i++) {
+            var parts = lines[i].split(',');
+            if (parts.length >= 2 && parts[0].trim() !== "" && parts[1].trim() !== "") {
+                var item = { en: parts[0].trim(), ja: parts[1].trim() };
+                originalList.push(item);
+                allJapaneseAnswers.push(parts[1].trim());
+            }
+        }
+    }
+
+    // iPadプレビューでも確実に動く画面切り替え関数
+    function showScreen(screenId) {
+        document.getElementById('screen-login').style.display = 'none';
+        document.getElementById('screen-quiz').style.display = 'none';
+        document.getElementById('screen-result').style.display = 'none';
+        
+        document.getElementById(screenId).style.display = 'block';
+    }
+
+    function submitProfile() {
+        var uClass = document.getElementById('user-class').value.trim();
+        var uNumber = document.getElementById('user-number').value.trim();
+        var uName = document.getElementById('user-name').value.trim();
+
+        if (!uClass || !uNumber || !uName) {
+            alert("すべての項目を入力してください！");
+            return;
+        }
+
+        userProfile = { class: uClass, number: uNumber, name: uName };
+        startQuizSession();
+    }
+
+    function startQuizSession() {
+        attemptCount++;
+        correctCount = 0;
+        currentWordIndex = 0;
+        quizQueue = JSON.parse(JSON.stringify(originalList));
+        quizQueue.sort(function() { return Math.random() - 0.5; });
+
+        showScreen('screen-quiz');
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        if (currentWordIndex >= quizQueue.length) {
+            showResult();
+            return;
+        }
+
+        document.getElementById('result-message').innerText = '';
+        document.getElementById('result-message').className = 'result-msg';
+        document.getElementById('quiz-progress').innerText = (currentWordIndex + 1) + " / " + quizQueue.length;
+        isAnswered = false;
+
+        var currentWord = quizQueue[currentWordIndex];
+        document.getElementById('question-word').innerText = currentWord.en;
+
+        // 音声読み上げ
+        speakCurrentWord();
+
+        // 4択作成
+        var choices = [currentWord.ja];
+        while (choices.length < 4 && choices.length < allJapaneseAnswers.length) {
+            var randomJa = allJapaneseAnswers[Math.floor(Math.random() * allJapaneseAnswers.length)];
+            if (choices.indexOf(randomJa) === -1) {
+                choices.push(randomJa);
+            }
+        }
+        choices.sort(function() { return Math.random() - 0.5; });
+
+        var container = document.getElementById('choices-container');
+        container.innerHTML = '';
+        
+        for (var i = 0; i < choices.length; i++) {
+            (function(choiceText) {
+                var button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.innerText = choiceText;
+                button.onclick = function() { checkAnswer(choiceText, currentWord.ja, button); };
+                container.appendChild(button);
+            })(choices[i]);
+        }
+
+        startTimer();
+    }
+
+    function speakCurrentWord() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            var currentWord = quizQueue[currentWordIndex];
+            if (!currentWord) return;
+
+            var utterance = new SpeechSynthesisUtterance(currentWord.en);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = timeLimit;
+        updateTimerDisplay();
+
+        var updateInterval = 100;
+        timerInterval = setInterval(function() {
+            timeLeft -= updateInterval;
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                clearInterval(timerInterval);
+                timeUp();
+            }
+            updateTimerDisplay();
+        }, updateInterval);
+    }
+
+    function updateTimerDisplay() {
+        var progressPercent = (timeLeft / timeLimit) * 100;
+        document.getElementById('timer-progress').style.width = progressPercent + '%';
+        document.getElementById('timer-sec').innerText = (timeLeft / 1000).toFixed(1);
+    }
+
+    function timeUp() {
+        if (isAnswered) return;
+        isAnswered = true;
+
+        clearInterval(timerInterval);
+        
+        var currentWord = quizQueue[currentWordIndex];
+        var buttons = document.querySelectorAll('.choice-btn');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].disabled = true;
+            if (buttons[i].innerText === currentWord.ja) {
+                buttons[i].classList.add('correct-choice');
+            }
+        }
+
+        var resultDiv = document.getElementById('result-message');
+        resultDiv.innerText = 'boo! (時間切れ)';
+        resultDiv.className = 'result-msg wrong';
+
+        currentWordIndex++;
+        autoNextTimeout = setTimeout(nextQuestion, 1000);
+    }
+
+    function checkAnswer(selected, correct, selectedButton) {
+        if (isAnswered) return;
+        isAnswered = true;
+
+        clearInterval(timerInterval);
+        
+        var resultDiv = document.getElementById('result-message');
+        var buttons = document.querySelectorAll('.choice-btn');
+        
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].disabled = true;
+            if (buttons[i].innerText === correct) {
+                buttons[i].classList.add('correct-choice');
+            }
+        }
+
+        if (selected === correct) {
+            resultDiv.innerText = 'right!';
+            resultDiv.className = 'result-msg right';
+            correctCount++;
+        } else {
+            selectedButton.classList.add('wrong-choice');
+            resultDiv.innerText = 'boo!';
+            resultDiv.className = 'result-msg wrong';
+        }
+
+        currentWordIndex++;
+        autoNextTimeout = setTimeout(nextQuestion, 1000);
+    }
+
+    function showResult() {
+        clearInterval(timerInterval);
+        clearTimeout(autoNextTimeout);
+        showScreen('screen-result');
+        
+        var scorePercent = Math.round((correctCount / quizQueue.length) * 100);
+        document.getElementById('score-text').innerText = scorePercent + '%';
+
+        var perfectArea = document.getElementById('perfect-area');
+        
+        if (scorePercent === 100) {
+            var now = new Date();
+            var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+            
+            document.getElementById('record-count').innerText = attemptCount;
+            document.getElementById('record-time').innerText = timeStr;
+            document.getElementById('record-class').innerText = userProfile.class;
+            document.getElementById('record-number').innerText = userProfile.number;
+            document.getElementById('record-name').innerText = userProfile.name;
+            
+            perfectArea.style.display = 'block';
+        } else {
+            perfectArea.style.display = 'none';
+        }
+    }
+
+    function restartQuiz() {
+        startQuizSession();
+    }
+</script>
+
+</body>
+</html>
