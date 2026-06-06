@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英語並べ替え練習問題 Lesson 4</title>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ec4b6;
+            --error-color: #e63946;
+            --bg-color: #f7f9fc;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 650px;
+            position: relative;
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+            margin-top: 0;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .sub-comment {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+        .hidden { display: none !important; }
+        
+        /* 入力画面 */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px; border: 1px solid #ccc; border-radius: 6px;
+            box-sizing: border-box; font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 12px; background-color: var(--primary-color); color: white;
+            border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #357abd; }
+
+        /* クイズ画面 */
+        .info-bar {
+            display: flex;
+            justify-content: space-between; align-items: center;
+            font-size: 0.9rem; color: #666; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;
+        }
+        .timer { font-weight: bold; color: var(--error-color); font-size: 1.1rem; }
+        .hint-jp {
+            font-size: 1.2rem;
+            font-weight: bold; color: #333; margin-bottom: 20px;
+            background: #eef1f6; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary-color);
+        }
+        
+        /* エリア共通設定 */
+        .zone-title {
+            font-size: 0.85rem;
+            color: #777; font-weight: bold; margin-bottom: 5px; margin-top: 15px;
+        }
+        .sentence-container {
+            display: flex;
+            align-items: flex-end; gap: 10px; width: 100%;
+        }
+        .sortable-list {
+            display: flex;
+            flex-wrap: wrap; gap: 10px; min-height: 60px; padding: 10px;
+            background: #fff; border: 2px dashed #cbd5e0; border-radius: 8px; flex-grow: 1;
+        }
+        .trash-list {
+            display: flex;
+            flex-wrap: wrap; gap: 10px; min-height: 60px; padding: 10px;
+            background: #fff5f5; border: 2px dashed #feb2b2; border-radius: 8px;
+        }
+        .fixed-mark {
+            font-size: 1.8rem;
+            font-weight: bold; color: #333; padding-bottom: 5px; min-width: 15px;
+        }
+        .word-item {
+            background-color: #fff;
+            padding: 8px 16px; border: 1px solid #ddd;
+            border-radius: 20px; cursor: grab; user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .word-item:active { cursor: grabbing; }
+        
+        /* 丸判定用オーバーレイ */
+        .feedback {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 12px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white;
+            font-size: 2.5rem; font-weight: bold; z-index: 10; opacity: 0.95; text-align: center; padding: 20px; box-sizing: border-box;
+        }
+        .feedback.correct { background-color: var(--success-color); }
+        .feedback.incorrect { background-color: var(--error-color); }
+        
+        /* 不正解時の詳細表示エリア */
+        .wrong-details-container {
+            font-size: 1.1rem;
+            margin-top: 15px; font-weight: normal; 
+            background: rgba(0,0,0,0.25); padding: 15px; border-radius: 8px; width: 90%; text-align: left; box-sizing: border-box;
+        }
+        .wrong-details-container div { margin-bottom: 8px; line-height: 1.4; }
+        .wrong-details-container div:last-child { margin-bottom: 0; }
+        .wrong-label { font-weight: bold; font-size: 0.85rem; opacity: 0.8; display: block; margin-bottom: 2px; }
+        .diff-text { background: transparent; padding: 2px 4px; border-radius: 4px; }
+        .diff-text.wrong-part { background-color: #ff4a5a; text-decoration: line-through; font-weight: bold; }
+
+        /* 結果画面 */
+        .result-box {
+            background: #fff;
+            border: 2px solid #ddd; padding: 20px; border-radius: 8px; margin-top: 15px; text-align: left;
+        }
+        .result-box p { margin: 8px 0; font-size: 1rem; color: #444; }
+        .accent-text { font-weight: bold; color: var(--error-color); font-size: 1.3rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="feedback-screen" class="feedback hidden">
+        <div id="feedback-text">Right!</div>
+        <div id="wrong-details-screen" class="wrong-details-container hidden">
+            <div>
+                <span class="wrong-label">あなたの解答:</span>
+                <span id="user-answer-display"></span>
+            </div>
+            <div>
+                <span class="wrong-label">正しい解答:</span>
+                <span id="correct-answer-display"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-screen">
+        <h1 id="quiz-title">英語並べ替え練習問題 Lesson 4</h1>
+        <div class="sub-comment">先頭の語も小文字になっています。1つ使わない語句が入っています。</div>
+        <div class="form-group">
+            <label for="class-num">クラス</label>
+            <input type="text" id="class-num" placeholder="例: 8, C2" required autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label for="student-num">番号</label>
+            <input type="text" id="student-num" placeholder="例: 13, D2" required autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label for="user-name">名前</label>
+            <input type="text" id="user-name" placeholder="例: 寺部だい" required autocomplete="off">
+        </div>
+        <button id="start-btn">スタート</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="info-bar">
+            <span id="display-user"></span>
+            <span class="timer">残り時間: <span id="time-left">30</span>秒</span>
+            <span id="progress"></span>
+        </div>
+        <div class="hint-jp" id="hint-jp">日本語のヒント</div>
+        
+        <div class="zone-title">解答エリア（正しい順に並べてください）</div>
+        <div class="sentence-container">
+            <div id="list-answer" class="sortable-list"></div>
+            <div id="fixed-mark" class="fixed-mark">.</div>
+        </div>
+        
+        <div class="zone-title">使わない語句エリア（不要なパーツはここへ退避）</div>
+        <div id="list-trash" class="trash-list"></div>
+        
+        <button id="check-btn">確認する</button>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <h2 id="result-status-title">結果発表</h2>
+        <div class="result-box">
+            <p><strong>クラス・番号 名前:</strong> <span id="res-user"></span></p>
+            <p><strong>正解率:</strong> <span id="res-accuracy" class="accent-text"></span></p>
+            <div id="perfect-records" class="hidden">
+                <p><strong>クイズ題名:</strong> <span id="res-title">英語並べ替え練習問題 Lesson 4</span></p>
+                <p><strong>100%になるまでやった回数:</strong> <span id="res-attempts" class="accent-text"></span> 回目</p>
+                <p><strong>100%になった日時:</strong> <span id="res-datetime"></span></p>
+            </div>
+        </div>
+        <button id="retry-btn">タイトルに戻る</button>
+    </div>
+</div>
+
+<script>
+    // 元データ（固定順序のマスターデータ）
+    const masterQuestions = [
+        {
+            jp: "結果が出ないような努力は無意味だ",
+            en: ["efforts", "without", "results", "are", "meaningless"],
+            mark: ".",
+            fake: "reasons"
+        },
+        {
+            jp: "結果よりも過程が大事だ",
+            en: ["process", "is", "more", "important", "than", "results"],
+            mark: ".",
+            fake: "efforts"
+        },
+        {
+            jp: "彼は北米最高峰上空のオーロラの写真を撮る",
+            en: ["he", "takes a photo", "of", "the northern lights", "over", "the tallest peak", "in", "North America"],
+            mark: ".",
+            fake: "for"
+        },
+        {
+            jp: "彼は1996年にロシアでクマに襲われて死んだ有名な自然写真家です。",
+            en: ["he is", "a famous", "nature photographer", "killed", "in", "a bear attack", "in Russia", "in 1996"],
+            mark: "",
+            fake: "killing"
+        },
+        {
+            jp: "松本さんがその写真を撮るのに２年かかりました。",
+            en: ["it", "took", "Matsumoto", "two years", "to", "take", "the photo"],
+            mark: ".",
+            fake: "for"
+        },
+        {
+            jp: "半月はオーロラを消さない程度に弱かった。",
+            en: ["a half-moon", "was", "weak", "enough", "not", "to", "kill", "the northern lights"],
+            mark: ".",
+            fake: "very"
+        },
+        {
+            jp: "彼はついになんとかその写真を撮ることをやり遂げました。",
+            en: ["he", "finally", "managed", "to", "take", "the photo"],
+            mark: ".",
+            fake: "actually"
+        },
+        {
+            jp: "彼は自分の人生で何をしたいのか全くわかりませんでした。",
+            en: ["he", "had", "no idea", "what", "he", "wanted to do", "with his life"],
+            mark: ".",
+            fake: "was"
+        },
+        {
+            jp: "彼は書店で『アラスカ』という書名の本をふと見つけました。",
+            en: ["he", "came", "across", "a book", "titled", "Alaska", "in a book store"],
+            mark: ".",
+            fake: "found"
+        },
+        {
+            jp: "彼は歴史を含め，アラスカのさまざまな多くの側面を研究しました。",
+            en: ["he", "studied", "many", "different aspects", "of Alaska", ",", "including", "its history"],
+            mark: ".",
+            fake: "found"
+        },
+        {
+            jp: "松本さんは無人島で２か月間キャンプをして過ごします。",
+            en: ["Matsumoto", "spends", "two months", "camping", "on", "a deserted island"],
+            mark: ".",
+            fake: "takes"
+        },
+        {
+            jp: "彼はこれを20年以上続けています。",
+            en: ["he", "has", "been", "doing", "for", "more", "than", "20 years"],
+            mark: ".",
+            fake: "done"
+        },
+        {
+            jp: "私は気温が摂氏マイナス 40 度まで下がる場所で２か月間を過ごします。",
+            en: ["I", "spend", "two months", "in", "a place", "where", "the temperature", "drops", "to minus", "40 degrees Celsius"],
+            mark: ".",
+            fake: "which"
+        }
+    ];
+
+    let currentQuestions = [];
+    let currentIdx = 0;
+    let score = 0;
+    let timerInterval = null;
+    let timeLeft = 30;
+    // 番号(studentNum)も保持できるようにオブジェクトの構造を拡張
+    let userData = { classNum: "", studentNum: "", name: "" };
+    let sortables = [];
+
+    // 効果音再生用
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(130, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        }
+    }
+
+    function shuffle(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    const loginScreen = document.getElementById('login-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const feedbackScreen = document.getElementById('feedback-screen');
+    const feedbackText = document.getElementById('feedback-text');
+    const wrongDetailsScreen = document.getElementById('wrong-details-screen');
+    const userAnswerDisplay = document.getElementById('user-answer-display');
+    const correctAnswerDisplay = document.getElementById('correct-answer-display');
+
+    // スタートボタン
+    document.getElementById('start-btn').addEventListener('click', () => {
+        const classNum = document.getElementById('class-num').value.trim();
+        const studentNum = document.getElementById('student-num').value.trim();
+        const userName = document.getElementById('user-name').value.trim();
+        
+        // 未入力チェックに番号も追加
+        if (!classNum || !studentNum || !userName) { 
+            alert('クラス、番号、名前を入力してください。'); 
+            return; 
+        }
+
+        userData.classNum = classNum;
+        userData.studentNum = studentNum;
+        userData.name = userName;
+
+        // 保存用キーを一意にするため番号(studentNum)も含める
+        const key = `attempts_${classNum}_${studentNum}_${userName}`;
+        let attempts = parseInt(localStorage.getItem(key) || "0");
+        localStorage.setItem(key, attempts + 1);
+
+        currentQuestions = shuffle(masterQuestions);
+
+        loginScreen.classList.add('hidden');
+        quizScreen.classList.remove('hidden');
+        currentIdx = 0; score = 0;
+        loadQuestion();
+    });
+
+    // 問題の読み込み
+    function loadQuestion() {
+        if (timerInterval) clearInterval(timerInterval);
+        feedbackScreen.classList.add('hidden');
+        wrongDetailsScreen.classList.add('hidden');
+        const q = currentQuestions[currentIdx];
+        
+        // 画面上部のユーザー名表示に番号を追加
+        document.getElementById('display-user').textContent = `${userData.classNum} 組 ${userData.studentNum} 番 ${userData.name}`;
+        document.getElementById('progress').textContent = `${currentIdx + 1} / ${currentQuestions.length}`;
+        document.getElementById('hint-jp').textContent = q.jp;
+        document.getElementById('fixed-mark').textContent = q.mark;
+
+        const allOptions = [...q.en, q.fake];
+        const shuffledOptions = shuffle(allOptions);
+
+        const trashArea = document.getElementById('list-trash');
+        const answerArea = document.getElementById('list-answer');
+        trashArea.innerHTML = '';
+        answerArea.innerHTML = '';
+        
+        shuffledOptions.forEach(word => {
+            const wordEl = document.createElement('div');
+            wordEl.className = 'word-item';
+            wordEl.textContent = word;
+            trashArea.appendChild(wordEl);
+        });
+        sortables.forEach(s => s.destroy());
+        const sortOptions = { group: 'words', animation: 150 };
+        sortables = [
+            new Sortable(answerArea, sortOptions),
+            new Sortable(trashArea, sortOptions)
+        ];
+        timeLeft = 30;
+        document.getElementById('time-left').textContent = timeLeft;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('time-left').textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                checkAnswer(true); // 時間切れ
+            }
+        }, 1000);
+    }
+
+    // 確認ボタン
+    document.getElementById('check-btn').addEventListener('click', () => {
+        clearInterval(timerInterval);
+        checkAnswer(false);
+    });
+
+    // 判定
+    function checkAnswer(isTimeUp = false) {
+        const q = currentQuestions[currentIdx];
+        const currentOrder = Array.from(document.getElementById('list-answer').children).map(el => el.textContent);
+        
+        const correctAnswerStr = q.en.join(' ');
+        const userAnswerStr = currentOrder.join(' ');
+        let isCorrect = !isTimeUp && (userAnswerStr === correctAnswerStr);
+        let waitTime = 1000; // デフォルトの待ち時間 (正解時: 1秒)
+
+        if (isCorrect) {
+            score++;
+            playSound('correct');
+            feedbackScreen.className = "feedback correct";
+            feedbackText.textContent = "Right!";
+        } else {
+            waitTime = 3000; // 不正解時の待ち時間: 3秒
+            playSound('incorrect');
+            feedbackScreen.className = "feedback incorrect";
+            feedbackText.textContent = isTimeUp ? "Time Up!" : "Wrong!";
+            
+            // --- ユーザーの解答文と間違い箇所の比較生成 ---
+            userAnswerDisplay.innerHTML = '';
+            if (currentOrder.length === 0) {
+                userAnswerDisplay.innerHTML = '<span style="opacity:0.6;">（未入力）</span>';
+            } else {
+                currentOrder.forEach((word, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'diff-text';
+                    span.textContent = word + ' ';
+                    
+                    // 正解配列の同じ位置の単語と異なる場合、赤くハイライト
+                    if (word !== q.en[index]) {
+                        span.classList.add('wrong-part');
+                    }
+                    userAnswerDisplay.appendChild(span);
+                });
+                // 文末マークをユーザー解答の最後にも付与
+                if (q.mark) {
+                    const markSpan = document.createElement('span');
+                    markSpan.textContent = q.mark;
+                    userAnswerDisplay.appendChild(markSpan);
+                }
+            }
+
+            // --- 正解文の生成 ---
+            let fullCorrect = q.en.join(' ');
+            if (q.mark !== "," && q.mark !== "." && q.mark !== "?" && q.mark !== "") {
+                fullCorrect += " " + q.mark;
+            } else {
+                fullCorrect += q.mark;
+            }
+            correctAnswerDisplay.textContent = fullCorrect;
+            // 詳細表示エリアを展開
+            wrongDetailsScreen.classList.remove('hidden');
+        }
+        
+        feedbackScreen.classList.remove('hidden');
+        // 設定された時間後（1秒 or 3秒）に自動で次へ進む
+        setTimeout(() => {
+            currentIdx++;
+            if (currentIdx < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }, waitTime);
+    }
+
+    // 結果画面
+    function showResult() {
+        feedbackScreen.classList.add('hidden');
+        quizScreen.classList.add('hidden');
+        resultScreen.classList.remove('hidden');
+
+        const accuracy = Math.round((score / currentQuestions.length) * 100);
+        
+        // 結果画面のユーザー名に「クラス、番号、名前」をすべて表示する
+        document.getElementById('res-user').textContent = `${userData.classNum} 組 ${userData.studentNum} 番 ${userData.name}`;
+        document.getElementById('res-accuracy').textContent = `${accuracy}%`;
+        const perfectRecords = document.getElementById('perfect-records');
+        
+        if (accuracy === 100) {
+            document.getElementById('result-status-title').textContent = "🎉 100% 達成おめでとうございます！ 🎉";
+            perfectRecords.classList.remove('hidden');
+            
+            // 拡張したキーで回数を取得
+            const key = `attempts_${userData.classNum}_${userData.studentNum}_${userData.name}`;
+            const attempts = localStorage.getItem(key) || "1";
+            const now = new Date();
+            const datetimeStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+
+            document.getElementById('res-attempts').textContent = attempts;
+            document.getElementById('res-datetime').textContent = datetimeStr;
+        } else {
+            document.getElementById('result-status-title').textContent = "結果発表";
+            perfectRecords.classList.add('hidden');
+        }
+    }
+
+    // タイトルへ戻るボタン
+    document.getElementById('retry-btn').addEventListener('click', () => {
+        resultScreen.classList.add('hidden');
+        loginScreen.classList.remove('hidden');
+    });
+</script>
+
+</body>
+</html>
