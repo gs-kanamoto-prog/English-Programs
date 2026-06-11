@@ -11,7 +11,8 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f4f6f9;
+            /* 全体を優しいイエロー背景に */
+            background-color: #fef7e0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,13 +25,14 @@
             background-color: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(251, 188, 4, 0.15);
             text-align: center;
             width: 100%;
             max-width: 550px;
             box-sizing: border-box;
+            border: 2px solid #fde293;
         }
-        h1 { color: #333; margin-top: 0; font-size: 24px; }
+        h1 { color: #443600; margin-top: 0; font-size: 24px; }
         
         /* 画面の表示・非表示コントロール */
         .screen { display: none; }
@@ -38,11 +40,13 @@
         /* タイマー表示 */
         .timer-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .timer-bar {
-            width: 70px; height: 8px; background-color: #e0e0e0;
+            width: 70px;
+            height: 8px; background-color: #e0e0e0;
             border-radius: 4px; overflow: hidden;
         }
         .timer-progress {
-            width: 100%; height: 100%; background-color: #ea4335;
+            width: 100%;
+            height: 100%; background-color: #ea4335;
         }
         .timer-text { font-size: 13px; color: #666; margin-top: 2px; text-align: left; }
 
@@ -50,38 +54,58 @@
         .form-group { margin-bottom: 12px; text-align: left; width: 85%; margin-left: auto; margin-right: auto; }
         .form-group label { font-size: 14px; color: #555; font-weight: bold; display: block; margin-bottom: 4px; }
         input[type="text"], input[type="number"] {
-            width: 100%; padding: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box;
+            width: 100%;
+            padding: 12px; border: 2px solid #fde293; border-radius: 8px; font-size: 16px; box-sizing: border-box;
             -webkit-appearance: none;
+            background-color: #fffde7;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #fbbc04;
+            background-color: #fff;
         }
         
+        /* メインボタン（イエロー基調） */
         .primary-btn {
-            background-color: #1a73e8; color: white; border: none;
+            background-color: #fbbc04;
+            color: #333; border: none;
             padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px;
             cursor: pointer; margin-top: 15px; width: 85%;
             -webkit-appearance: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .primary-btn:active {
+            background-color: #e3a800;
         }
         
         /* クイズエリア */
         .word-area {
-            display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0;
+            display: flex;
+            justify-content: center; align-items: center; gap: 15px; margin: 20px 0;
         }
-        .word { font-size: 38px; font-weight: bold; color: #1a73e8; word-break: break-all; }
+        .word { font-size: 38px; font-weight: bold; color: #e3a800; word-break: break-all; }
         
         .audio-btn {
-            background-color: #f1f3f4; border: none; font-size: 24px; cursor: pointer;
+            background-color: #fff8e1;
+            border: 1px solid #fde293; font-size: 24px; cursor: pointer;
             border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
         }
 
         /* 選択肢 2×2列（iPadのタッチ用に最適化） */
         .choices {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
         }
         .choice-btn {
-            background-color: #ffffff; border: 2px solid #dadce0; border-radius: 12px;
+            background-color: #ffffff;
+            border: 2px solid #fde293; border-radius: 12px;
             padding: 20px 10px; font-size: 18px; font-weight: bold; cursor: pointer; 
-            text-align: center; min-height: 80px; box-sizing: border-box;
+            text-align: center; min-height: 80px;
+            box-sizing: border-box;
             display: flex; align-items: center; justify-content: center;
             -webkit-appearance: none; -webkit-tap-highlight-color: transparent;
+            color: #443600;
         }
         
         /* 正解・不正解の装飾 */
@@ -91,20 +115,25 @@
         .result-msg { font-size: 32px; font-weight: bold; margin: 15px 0; min-height: 40px; }
         .right { color: #34a853; }
         .wrong { color: #ea4335; }
+        .info-msg { color: #666; font-size: 16px; margin: 15px 0; font-weight: bold; }
         
         /* 結果エリア */
         .score-display { font-size: 44px; font-weight: bold; color: #333; margin: 15px 0; }
         .perfect-record {
-            background-color: #e6f4ea; border: 2px solid #34a853; color: #137333;
+            background-color: #e6f4ea;
+            border: 2px solid #34a853; color: #137333;
             padding: 15px; border-radius: 8px; text-align: left; margin-top: 15px; font-size: 15px;
         }
         .perfect-title { font-size: 28px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #1b5e20; }
+        .next-challenge-msg {
+            background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404;
+            padding: 10px; margin-top: 10px; border-radius: 5px; font-weight: bold; text-align: center;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 1. ログイン画面 -->
     <div id="screen-login" class="screen" style="display: block;">
         <h1>📝 L.5 Pt.1 単語テスト</h1>
         <div class="form-group">
@@ -122,15 +151,14 @@
         <button class="primary-btn" onclick="submitProfile()">テストを始める</button>
     </div>
 
-    <!-- 2. モード選択画面 -->
     <div id="screen-mode" class="screen">
         <h1>⚙️ モード選択</h1>
         <p style="color: #666; margin-bottom: 25px;">練習するモードを選んでください。</p>
-        <button class="primary-btn" onclick="selectMode('en-ja')" style="background-color: #34a853; margin-bottom: 15px;">英 → 日 モード</button>
-        <button class="primary-btn" onclick="selectMode('ja-en')" style="background-color: #f4b400;">日 → 英 モード</button>
+        <button class="primary-btn" onclick="selectMode('en-ja')" style="background-color: #fbbc04; margin-bottom: 15px;">英 → 日 モード</button>
+        <button class="primary-btn" onclick="selectMode('ja-en')" style="background-color: #f4b400; margin-bottom: 15px;">日 → 英 モード</button>
+        <button class="primary-btn" onclick="selectMode('step-by-step')" style="background-color: #fff8e1; border: 2px solid #fbbc04; color: #e3a800; margin-bottom: 15px;">🐾 Step-by-Step mode (時間制限なし)</button>
     </div>
 
-    <!-- 3. クイズ画面 -->
     <div id="screen-quiz" class="screen">
         <div class="timer-container">
             <div id="quiz-timer-container">
@@ -147,11 +175,14 @@
         <div class="result-msg" id="result-message"></div>
     </div>
 
-    <!-- 4. 結果画面 -->
     <div id="screen-result" class="screen">
         <h1>🏁 テスト終了</h1>
         <div class="score-display" id="score-text">0%</div>
         
+        <div id="step-msg-area" class="info-msg" style="display: none;">
+            もう一度？あるいはクイズに挑戦しよう
+        </div>
+
         <div id="perfect-area" style="display: none;">
             <div class="perfect-title">🎉 100% 🎉</div>
             <div class="perfect-record">
@@ -163,14 +194,17 @@
                 <p><strong>番号:</strong> <span id="record-number"></span>番</p>
                 <p><strong>名前:</strong> <span id="record-name"></span></p>
             </div>
+            <div id="challenge-msg" class="next-challenge-msg" style="display: none;">
+                次は並べ替えに挑戦しよう
+            </div>
         </div>
         
-        <button class="primary-btn" onclick="restartQuiz()">もう一度挑戦する</button>
+        <button class="primary-btn" id="restart-btn" onclick="restartQuiz()">もう一度挑戦する</button>
     </div>
 </div>
 
 <script>
-    // ↓↓↓ 【先生用】ここにエクセルのデータを貼り付けてください ↓↓↓
+    // ↓↓↓ L5Pt1html の単語データに差し替えました ↓↓↓
     const defaultCSVData = `
 amusing,愉快な
 findings,研究結果
@@ -184,7 +218,7 @@ humorous,ユーモアのある
 science,科学
 award,賞を与える
 annually,毎年
-achievement,功績、達成
+achievement,業績、達成
 laugh,笑う
 then,それから
 following,次の
@@ -204,15 +238,15 @@ loud,音が大きい
 rate,評価する
 crisp,パリパリした…
 fresh,できたて
-`; // ↑↑↑ データの最後の行までここに挟んでください ↑↑↑
+`;
+    // ↑↑↑ データの最後の行まで ↑↑↑
 
     let userProfile = { class: '', number: '', name: '' };
     let originalList = [];
     let quizQueue = [];
     let allJapaneseAnswers = [];
     let allEnglishAnswers = []; 
-    let quizMode = 'en-ja'; 
-    
+    let quizMode = 'en-ja';
     let currentWordIndex = 0;
     let correctCount = 0;
     let attemptCount = 0;
@@ -222,9 +256,10 @@ fresh,できたて
     let timerInterval = null;
     let autoNextTimeout = null;
     let isAnswered = false;
+    let isWrongWaiting = false;
 
     let isMaleVoice = true;
-    let audioCtx = null; // iOS/iPadの音声ブロック解除・効果音生成用
+    let audioCtx = null;
 
     window.onload = function() {
         parseEmbeddedData(defaultCSVData);
@@ -270,7 +305,7 @@ fresh,できたて
         }
 
         userProfile = { class: uClass, number: uNumber, name: uName };
-        showScreen('screen-mode'); 
+        showScreen('screen-mode');
     }
 
     function selectMode(mode) {
@@ -299,20 +334,20 @@ fresh,できたて
         document.getElementById('result-message').className = 'result-msg';
         document.getElementById('quiz-progress').innerText = (currentWordIndex + 1) + " / " + quizQueue.length;
         isAnswered = false;
+        isWrongWaiting = false;
 
         isMaleVoice = Math.random() < 0.5;
-
         var currentWord = quizQueue[currentWordIndex];
         
-        if (quizMode === 'en-ja') {
+        if (quizMode === 'en-ja' || quizMode === 'step-by-step') {
             document.getElementById('question-word').innerText = currentWord.en;
             speakCurrentWord();
         } else {
             document.getElementById('question-word').innerText = currentWord.ja;
         }
 
-        var correctAnswer = (quizMode === 'en-ja') ? currentWord.ja : currentWord.en;
-        var dummyPool = (quizMode === 'en-ja') ? allJapaneseAnswers : allEnglishAnswers;
+        var correctAnswer = (quizMode === 'ja-en') ? currentWord.en : currentWord.ja;
+        var dummyPool = (quizMode === 'ja-en') ? allEnglishAnswers : allJapaneseAnswers;
 
         var choices = [correctAnswer];
         while (choices.length < 4 && choices.length < dummyPool.length) {
@@ -322,7 +357,6 @@ fresh,できたて
             }
         }
         choices.sort(function() { return Math.random() - 0.5; });
-
         var container = document.getElementById('choices-container');
         container.innerHTML = '';
         
@@ -336,7 +370,13 @@ fresh,できたて
             })(choices[i]);
         }
 
-        startTimer();
+        if (quizMode === 'step-by-step') {
+            document.getElementById('quiz-timer-container').style.visibility = 'hidden';
+            clearInterval(timerInterval);
+        } else {
+            document.getElementById('quiz-timer-container').style.visibility = 'visible';
+            startTimer();
+        }
     }
 
     function speakCurrentWord() {
@@ -348,14 +388,11 @@ fresh,できたて
             var utterance = new SpeechSynthesisUtterance(currentWord.en);
             utterance.lang = 'en-US';
             utterance.rate = 0.9;
-
             var voices = window.speechSynthesis.getVoices();
             var enVoices = voices.filter(function(v) { return v.lang.indexOf('en') === 0; });
-
             if (enVoices.length > 0) {
                 var maleKeywords = ['male', 'david', 'mark', 'daniel', 'aaron', 'george', 'ravi'];
                 var femaleKeywords = ['female', 'zira', 'samantha', 'karen', 'moira', 'hazel', 'susan', 'jessa'];
-
                 var maleVoices = enVoices.filter(function(v) {
                     var name = v.name.toLowerCase();
                     return maleKeywords.some(function(k) { return name.indexOf(k) !== -1; });
@@ -364,7 +401,6 @@ fresh,できたて
                     var name = v.name.toLowerCase();
                     return femaleKeywords.some(function(k) { return name.indexOf(k) !== -1; });
                 });
-
                 if (isMaleVoice && maleVoices.length > 0) {
                     utterance.voice = maleVoices[Math.floor(Math.random() * maleVoices.length)];
                     utterance.pitch = 0.85; 
@@ -374,7 +410,7 @@ fresh,できたて
                 } else {
                     var randomVoice = enVoices[Math.floor(Math.random() * enVoices.length)];
                     utterance.voice = randomVoice;
-                    utterance.pitch = isMaleVoice ? 0.8 : 1.2; 
+                    utterance.pitch = isMaleVoice ? 0.8 : 1.2;
                 }
             } else {
                 utterance.pitch = isMaleVoice ? 0.8 : 1.2;
@@ -384,7 +420,6 @@ fresh,できたて
         }
     }
 
-    // iOS/iPadの音声ガードを解除するための初期化関数
     function initAudioContext() {
         if (!audioCtx) {
             let AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -421,12 +456,11 @@ fresh,できたて
     function timeUp() {
         if (isAnswered) return;
         isAnswered = true;
-
         clearInterval(timerInterval);
         initAudioContext();
         
         var currentWord = quizQueue[currentWordIndex];
-        var correctAnswer = (quizMode === 'en-ja') ? currentWord.ja : currentWord.en;
+        var correctAnswer = (quizMode === 'ja-en') ? currentWord.en : currentWord.ja;
         var buttons = document.querySelectorAll('.choice-btn');
         for (var i = 0; i < buttons.length; i++) {
             buttons[i].disabled = true;
@@ -448,38 +482,76 @@ fresh,できたて
     }
 
     function checkAnswer(selected, correct, selectedButton) {
-        if (isAnswered) return;
-        isAnswered = true;
-
-        clearInterval(timerInterval);
-        initAudioContext(); // ボタンタップの瞬間にオーディオの権限を確保
-        
-        var resultDiv = document.getElementById('result-message');
-        var buttons = document.querySelectorAll('.choice-btn');
-        
-        for (var i = 0; i < buttons.length; i++) {
-            buttons[i].disabled = true;
-            if (buttons[i].innerText === correct) {
-                buttons[i].classList.add('correct-choice');
+        if (quizMode === 'step-by-step' && isWrongWaiting) {
+            if (selected === correct) {
+                isWrongWaiting = false;
+                currentWordIndex++;
+                nextQuestion();
             }
+            return;
         }
 
+        if (isAnswered) return;
+
+        initAudioContext();
+        var resultDiv = document.getElementById('result-message');
+        var buttons = document.querySelectorAll('.choice-btn');
+
         if (selected === correct) {
+            isAnswered = true;
+            clearInterval(timerInterval);
+            
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (buttons[i].innerText === correct) {
+                    buttons[i].classList.add('correct-choice');
+                }
+            }
             resultDiv.innerText = 'right!';
             resultDiv.className = 'result-msg right';
             correctCount++;
+
+            if (quizMode === 'ja-en') {
+                speakCurrentWord();
+            }
+
+            currentWordIndex++;
+            autoNextTimeout = setTimeout(nextQuestion, 1000);
         } else {
-            selectedButton.classList.add('wrong-choice');
-            resultDiv.innerText = 'boo!';
-            resultDiv.className = 'result-msg wrong';
-        }
+            if (quizMode === 'step-by-step') {
+                selectedButton.classList.add('wrong-choice');
+                resultDiv.innerText = 'boo! 正解をタッチしよう';
+                resultDiv.className = 'result-msg wrong';
+                
+                isWrongWaiting = true;
+                for (var i = 0; i < buttons.length; i++) {
+                    if (buttons[i].innerText === correct) {
+                        buttons[i].classList.add('correct-choice');
+                    } else if (buttons[i] !== selectedButton) {
+                        buttons[i].disabled = true;
+                    }
+                }
+            } else {
+                isAnswered = true;
+                clearInterval(timerInterval);
+                for (var i = 0; i < buttons.length; i++) {
+                    buttons[i].disabled = true;
+                    if (buttons[i].innerText === correct) {
+                        buttons[i].classList.add('correct-choice');
+                    }
+                }
+                selectedButton.classList.add('wrong-choice');
+                resultDiv.innerText = 'boo!';
+                resultDiv.className = 'result-msg wrong';
 
-        if (quizMode === 'ja-en') {
-            speakCurrentWord();
-        }
+                if (quizMode === 'ja-en') {
+                    speakCurrentWord();
+                }
 
-        currentWordIndex++;
-        autoNextTimeout = setTimeout(nextQuestion, 1000);
+                currentWordIndex++;
+                autoNextTimeout = setTimeout(nextQuestion, 1000);
+            }
+        }
     }
 
     function showResult() {
@@ -491,65 +563,69 @@ fresh,できたて
         document.getElementById('score-text').innerText = scorePercent + '%';
 
         var perfectArea = document.getElementById('perfect-area');
-        
-        if (scorePercent === 100) {
-            var now = new Date();
-            var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
-            
-            var modeText = (quizMode === 'en-ja') ? '英 → 日 モード' : '日 → 英 モード';
-            
-            // 100%時の表示データをセット
-            document.getElementById('record-mode').innerText = modeText;
-            document.getElementById('record-count').innerText = attemptCount;
-            document.getElementById('record-score').innerText = scorePercent + '%';
-            document.getElementById('record-time').innerText = timeStr;
-            document.getElementById('record-class').innerText = userProfile.class;
-            document.getElementById('record-number').innerText = userProfile.number;
-            document.getElementById('record-name').innerText = userProfile.name;
-            
-            perfectArea.style.display = 'block';
+        var stepMsgArea = document.getElementById('step-msg-area');
+        var challengeMsg = document.getElementById('challenge-msg');
+        var restartBtn = document.getElementById('restart-btn');
 
-            // 🎉 100%達成時の音声・SE演出
-            speakGreat();
-            playCelebrationSound();
+        perfectArea.style.display = 'none';
+        stepMsgArea.style.display = 'none';
+        challengeMsg.style.display = 'none';
+
+        if (quizMode === 'step-by-step') {
+            stepMsgArea.style.display = 'block';
+            restartBtn.innerText = 'モード選択にもどる';
         } else {
-            perfectArea.style.display = 'none';
+            restartBtn.innerText = 'もう一度挑戦する';
+            
+            if (scorePercent === 100) {
+                var now = new Date();
+                var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+                var modeText = (quizMode === 'en-ja') ? '英 → 日 モード' : '日 → 英 モード';
+                
+                document.getElementById('record-mode').innerText = modeText;
+                document.getElementById('record-count').innerText = attemptCount;
+                document.getElementById('record-score').innerText = scorePercent + '%';
+                document.getElementById('record-time').innerText = timeStr;
+                document.getElementById('record-class').innerText = userProfile.class;
+                document.getElementById('record-number').innerText = userProfile.number;
+                document.getElementById('record-name').innerText = userProfile.name;
+                
+                perfectArea.style.display = 'block';
+                challengeMsg.style.display = 'block';
+                
+                speakGreat();
+                playCelebrationSound();
+            }
         }
     }
 
-    // 「Great!」の発音
     function speakGreat() {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             var utterance = new SpeechSynthesisUtterance("Great!");
             utterance.lang = 'en-US';
             utterance.rate = 0.95;
-            utterance.pitch = 1.2; // 少し高めで嬉しそうに
+            utterance.pitch = 1.2;
             window.speechSynthesis.speak(utterance);
         }
     }
 
-    // 拍手と口笛の効果音合成（Web Audio API）
     function playCelebrationSound() {
         try {
             initAudioContext();
             if (!audioCtx) return;
 
             let now = audioCtx.currentTime;
-            
-            // 1. 口笛（ピッチをヒュイーンと滑らかに上げて楽しげに表現）
             playWhistle(audioCtx, now + 0.0);
             playWhistle(audioCtx, now + 0.5);
             
-            // 2. 拍手（ホワイトノイズに特定のフィルターをかけ、大量かつランダムに重ねる）
-            let bufferSize = audioCtx.sampleRate * 0.08; 
+            let bufferSize = audioCtx.sampleRate * 0.08;
             let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             let data = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
                 data[i] = Math.random() * 2 - 1;
             }
             
-            // 約2.5秒間で70回パチパチとバラバラにトリガーする
             for (let i = 0; i < 70; i++) {
                 let randTime = now + Math.random() * 2.3;
                 let source = audioCtx.createBufferSource();
@@ -557,9 +633,8 @@ fresh,できたて
                 
                 let filter = audioCtx.createBiquadFilter();
                 filter.type = 'bandpass';
-                filter.frequency.value = 900 + Math.random() * 600; // 手を叩く周波数
+                filter.frequency.value = 900 + Math.random() * 600;
                 filter.Q.value = 2.5;
-                
                 let gain = audioCtx.createGain();
                 let vol = 0.08 + Math.random() * 0.12;
                 gain.gain.setValueAtTime(vol, randTime);
