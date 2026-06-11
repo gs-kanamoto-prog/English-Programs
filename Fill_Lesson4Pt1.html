@@ -6,11 +6,12 @@
     <title>Lesson 4 Part.1 本文穴埋め練習</title>
     <style>
         :root {
-            --primary-color: #4a90e2;
-            --success-color: #2ec4b6;
-            --error-color: #e71d36;
-            --bg-color: #f8f9fa;
-            --text-color: #333;
+            /* 全体を紫系統（ディープパープル／アメジスト）に統一 */
+            --primary-color: #6a1b9a;    /* 落ち着いた深みのある紫 */
+            --success-color: #8e24aa;    /* 正解時：明るめの紫 */
+            --error-color: #d32f2f;      /* 不正解時：視認性の高い赤 */
+            --bg-color: #f3e5f5;         /* 背景色：ごく薄い藤色・ラベンダー */
+            --text-color: #2a1b3d;       /* 文字色：暗い濃紫 */
         }
 
         body {
@@ -31,7 +32,7 @@
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(106, 27, 154, 0.15); /* 紫系統の淡い影 */
         }
 
         h1 {
@@ -62,10 +63,15 @@
         input[type="text"] {
             width: 100%;
             padding: 10px;
-            border: 2px solid #ddd;
+            border: 2px solid #e1bee7; /* 薄い紫のボーダー */
             border-radius: 6px;
             font-size: 16px;
             box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
         }
 
         .btn-group {
@@ -87,7 +93,7 @@
 
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-success { background-color: var(--success-color); color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary { background-color: #7b1fa2; color: white; } /* 中間の紫 */
 
         button:hover { opacity: 0.9; }
 
@@ -103,7 +109,7 @@
             max-height: 60vh;
             overflow-y: auto;
             padding: 20px;
-            border: 2px solid #eee;
+            border: 2px solid #f3e5f5;
             border-radius: 8px;
             background: #fff;
             line-height: 2;
@@ -112,7 +118,7 @@
 
         .word-panel {
             flex: 1;
-            background: #f1f3f5;
+            background: #f3e5f5; /* パネル背景も薄い紫 */
             padding: 20px;
             border-radius: 8px;
             max-height: 60vh;
@@ -152,15 +158,16 @@
         .word-card {
             background: white;
             padding: 6px 12px;
-            border: 2px solid #dee2e6;
+            border: 2px solid #e1bee7;
             border-radius: 4px;
             cursor: grab;
             user-select: none;
             font-weight: bold;
+            color: var(--primary-color);
         }
 
         .word-card:active { cursor: grabbing; }
-        .word-card.correct-used { background-color: #d4edda; color: #155724; border-color: #c3e6cb; cursor: not-allowed; opacity: 0.6; }
+        .word-card.correct-used { background-color: #f3e5f5; color: #ba68c8; border-color: #e1bee7; cursor: not-allowed; opacity: 0.6; }
         .word-card.wrong-used { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
 
         /* フィードバックトースト */
@@ -178,12 +185,12 @@
             transition: opacity 0.2s;
             z-index: 1000;
         }
-        .fb-right { background-color: var(--success-color); box-shadow: 0 4px 10px rgba(46,196,182,0.4); }
+        .fb-right { background-color: var(--success-color); box-shadow: 0 4px 10px rgba(142,36,170,0.4); }
         .fb-boo { background-color: var(--error-color); box-shadow: 0 4px 10px rgba(231,29,54,0.4); }
 
         /* 結果画面 */
         .result-card {
-            background: #eef1f6;
+            background: #f3e5f5;
             padding: 30px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -201,7 +208,7 @@
         }
         .mistake-list-box {
             background: white;
-            border: 1px solid #dee2e6;
+            border: 1px solid #e1bee7;
             border-radius: 6px;
             padding: 15px;
             margin-top: 10px;
@@ -234,7 +241,7 @@
     <div id="login-screen" class="screen active">
         <div class="form-group"><label>クラス</label><input type="text" id="input-class" placeholder="例: 7, 8, C2"></div>
         <div class="form-group"><label>番号</label><input type="text" id="input-number" placeholder="例: 13"></div>
-        <div class="form-group"><label>氏名</label><input type="text" id="input-name" placeholder="例: 熊谷　誠人"></div>
+        <div class="form-group"><label>氏名</label><input type="text" id="input-name" placeholder="例: 熊谷 誠人"></div>
         
         <div class="btn-group">
             <button class="btn-primary" onclick="startGame('1st Step')">1st Step (都度判定)</button>
@@ -243,7 +250,7 @@
     </div>
 
     <div id="game-screen" class="screen">
-        <h2 id="mode-display" style="text-align: center; color: #666;"></h2>
+        <h2 id="mode-display" style="text-align: center; color: #5c2575;"></h2>
         <div style="margin-bottom: 10px; font-weight: bold;" id="player-info-display"></div>
         <div class="game-layout">
             <div class="text-panel" id="text-panel"></div>
@@ -276,36 +283,50 @@
 <div id="feedback"></div>
 
 <script>
+// Lesson 4 Part.1 のターゲット単語（全14語）
 const targetWords = {
-    1: "efforts", 2: "meaningless", 3: "assembly", 4: "disagree", 5: "myself",
-    6: "process", 7: "results", 8: "comment", 9: "changed", 10: "northern",
-    11: "peak", 12: "tribute", 13: "who", 14: "killed", 15: "took",
-    16: "foot", 17: "all", 18: "spent", 19: "same", 20: "both",
-    21: "moonlight", 22: "weak", 23: "strong", 24: "managed"
+    1: "photographer", 2: "nature", 3: "published", 4: "books", 5: "awarded",
+    6: "such", 7: "as", 8: "capturing", 9: "beautiful", 10: "scenery",
+    11: "wildlife", 12: "harsh", 13: "reality", 14: "global"
 };
 
+// Lesson 4 Part.1 の本文構造データ
 const fullTextStructure = [
-    { type: 'text', content: '“' }, { type: 'blank', id: 1 }, { type: 'text', content: ' without results are ' }, { type: 'blank', id: 2 }, { type: 'text', content: ',” said one of the teachers at a school ' },
-    { type: 'blank', id: 3 }, { type: 'text', content: ' when I was a junior high school student. “I ' }, { type: 'blank', id: 4 }, { type: 'text', content: ',” I said to ' },
-    { type: 'blank', id: 5 }, { type: 'text', content: '. “' }, { type: 'blank', id: 6 }, { type: 'text', content: ' is more important than ' },
-    { type: 'blank', id: 7 }, { type: 'text', content: '.” That was my reaction to the teacher’s ' }, { type: 'blank', id: 8 }, { type: 'text', content: '. My opinion still has not ' },
-    { type: 'blank', id: 9 }, { type: 'text', content: '.<br>—Matsumoto Norio, a nature photographer<br>&nbsp;&nbsp;&nbsp;Matsumoto wanted to take a photo of the ' },
-    { type: 'blank', id: 10 }, { type: 'text', content: ' lights over the tallest ' }, { type: 'blank', id: 11 }, { type: 'text', content: ' in North America. He thought such a photo would be a ' },
-    { type: 'blank', id: 12 }, { type: 'text', content: ' to Hoshino Michio, ' }, { type: 'blank', id: 13 }, { type: 'text', content: ' was a famous nature photographer ' },
-    { type: 'blank', id: 14 }, { type: 'text', content: ' in a bear attack in Russia in 1996.<br>&nbsp;&nbsp;&nbsp;It ' },
-    { type: 'blank', id: 15 }, { type: 'text', content: ' Matsumoto two years to take the photo. He made three winter camping trips to the ' },
-    { type: 'blank', id: 16 }, { type: 'text', content: ' of Mt. Denali. In ' }, { type: 'blank', id: 17 }, { type: 'text', content: ', he ' },
-    { type: 'blank', id: 18 }, { type: 'text', content: ' 64 days waiting for the northern lights and the mountain to stay in the ' },
-    { type: 'blank', id: 19 }, { type: 'text', content: ' frame. To capture ' }, { type: 'blank', id: 20 }, { type: 'text', content: ' of them at the same time, there had to be some ' },
-    { type: 'blank', id: 21 }, { type: 'text', content: '. He thought a half-moon would provide the best light because it was ' },
-    { type: 'blank', id: 22 }, { type: 'text', content: ' enough not to kill the northern lights but ' }, { type: 'blank', id: 23 }, { type: 'text', content: ' enough to light up the mountains. He finally ' },
-    { type: 'blank', id: 24 }, { type: 'text', content: ' to take the photo in February 2001.' }
+    { type: 'text', content: '&nbsp;&nbsp;&nbsp;Matsumoto Matsuko is a ' },
+    { type: 'blank', id: 1 },
+    { type: 'text', content: '. He mainly takes photos of ' },
+    { type: 'blank', id: 2 },
+    { type: 'text', content: ' in Alaska. He has ' },
+    { type: 'blank', id: 3 },
+    { type: 'text', content: ' many photo ' },
+    { type: 'blank', id: 4 },
+    { type: 'text', content: ' and was ' },
+    { type: 'blank', id: 5 },
+    { type: 'text', content: ' prestigious prizes ' },
+    { type: 'blank', id: 6 },
+    { type: 'text', content: ' ' },
+    { type: 'blank', id: 7 },
+    { type: 'text', content: ' the Kimura Ihei Award.<br>&nbsp;&nbsp;&nbsp;He has been ' },
+    { type: 'blank', id: 8 },
+    { type: 'text', content: ' not only the ' },
+    { type: 'blank', id: 9 },
+    { type: 'text', content: ' ' },
+    { type: 'blank', id: 10 },
+    { type: 'text', content: ' and ' },
+    { type: 'blank', id: 11 },
+    { type: 'text', content: ' of Alaska, but also the ' },
+    { type: 'blank', id: 12 },
+    { type: 'text', content: ' ' },
+    { type: 'blank', id: 13 },
+    { type: 'text', content: ' there, including the impact of ' },
+    { type: 'blank', id: 14 },
+    { type: 'text', content: ' warming.' }
 ];
 
-const totalBlanksCount = 24;
+const totalBlanksCount = 14; // Part.1 の空欄総数（全14箇所）
 let currentMode = '';
 let mistakeCount = 0;
-let userAnswers = {}; 
+let userAnswers = {};
 let mistakenWordsSet = new Set();
 let audioCtx = null;
 
@@ -316,52 +337,45 @@ function initAudio() {
 function playSound(type) {
     initAudio();
     if (!audioCtx) return;
-
     if (type === 'right') {
-        // 通常の正解音（ピンポン）
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(660, audioCtx.currentTime); 
+        osc.frequency.setValueAtTime(660, audioCtx.currentTime);
         osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
         gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-    } 
-    else if (type === 'tada') {
-        // 変更：「タダーン！」のファンファール音（Web Audio APIによる和音合成）
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+    } else if (type === 'tada') {
         const now = audioCtx.currentTime;
-        
-        // 1音目：「タ」（短い和音）
         playTone(523.25, now, 0.15); // ド
         playTone(659.25, now, 0.15); // ミ
         playTone(783.99, now, 0.15); // ソ
-        
-        // 2音目：「ダーン！」（少し遅れて鳴る、華やかな高音の和音）
         playTone(523.25, now + 0.18, 0.6); // ド
         playTone(659.25, now + 0.18, 0.6); // ミ
         playTone(783.99, now + 0.18, 0.6); // ソ
         playTone(1046.50, now + 0.18, 0.6); // 高いド
-    } 
-    else {
-        // 不正解音（ブー）
+    } else {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(150, audioCtx.currentTime);
         gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
     }
 }
 
-// 和音用の単音生成補助関数
 function playTone(freq, startTime, duration) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = 'triangle'; // 柔らかくもきらびやかな音色
+    osc.type = 'triangle';
     osc.frequency.setValueAtTime(freq, startTime);
     gain.gain.setValueAtTime(0.2, startTime);
     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
@@ -381,14 +395,14 @@ function startGame(mode) {
     mistakeCount = 0;
     userAnswers = {};
     mistakenWordsSet.clear();
-    
+
     const clazz = document.getElementById('input-class').value || '未入力';
     const num = document.getElementById('input-number').value || '未入力';
     const name = document.getElementById('input-name').value || '未入力';
-    
+
     document.getElementById('mode-display').innerText = currentMode;
     document.getElementById('player-info-display').innerText = `参加者: ${clazz} ${num}番 ${name}`;
-    
+
     buildGameBoard();
     showScreen('game-screen');
 }
@@ -402,7 +416,9 @@ function showToast(message, isRight) {
     fb.innerText = message;
     fb.className = isRight ? 'fb-right' : 'fb-boo';
     fb.style.opacity = '1';
-    setTimeout(() => { fb.style.opacity = '0'; }, 800);
+    setTimeout(() => {
+        fb.style.opacity = '0';
+    }, 800);
 }
 
 function buildGameBoard() {
@@ -421,10 +437,8 @@ function buildGameBoard() {
             blank.className = 'blank';
             blank.id = `blank-${item.id}`;
             blank.dataset.id = item.id;
-            
             blank.ondragover = (e) => e.preventDefault();
             blank.ondrop = (e) => handleDrop(e, item.id);
-            
             textPanel.appendChild(blank);
         }
     });
@@ -448,15 +462,16 @@ function handleDrop(e, blankId) {
     const data = JSON.parse(e.dataTransfer.getData('text/plain'));
     const draggedWord = data.word;
     const cardId = data.cardId;
+
     const blankEl = document.getElementById(`blank-${blankId}`);
     const cardEl = document.getElementById(cardId);
 
-    if (currentMode === '1st Step') {
-        if (blankEl.classList.contains('correct')) return;
+    if (!blankEl || !cardEl) return;
 
+    if (currentMode === '1st Step') {
         if (targetWords[blankId] === draggedWord) {
             playSound('right');
-            showToast('right!', true);
+            showToast('Good!', true);
             blankEl.innerText = draggedWord;
             blankEl.className = 'blank correct';
             cardEl.className = 'word-card correct-used';
@@ -468,17 +483,17 @@ function handleDrop(e, blankId) {
             showToast('boo!', false);
             mistakeCount++;
             mistakenWordsSet.add(targetWords[blankId]);
-            
             cardEl.classList.add('wrong-used');
             blankEl.classList.add('wrong');
-            setTimeout(() => { blankEl.classList.remove('wrong'); }, 500);
+            setTimeout(() => {
+                blankEl.classList.remove('wrong');
+            }, 500);
         }
     } else if (currentMode === '2nd Step') {
         blankEl.innerText = draggedWord;
-        blankEl.className = 'blank'; 
+        blankEl.className = 'blank';
         userAnswers[blankId] = draggedWord;
-        
-        cardEl.classList.add('correct-used');
+        cardEl.className = 'word-card correct-used';
 
         if (Object.keys(userAnswers).length === totalBlanksCount) {
             setTimeout(evaluateSecondStep, 1000);
@@ -488,11 +503,10 @@ function handleDrop(e, blankId) {
 
 function evaluateSecondStep() {
     let allCorrect = true;
-
     for (let id = 1; id <= totalBlanksCount; id++) {
         const blankEl = document.getElementById(`blank-${id}`);
         const userAns = userAnswers[id];
-        
+
         if (targetWords[id] === userAns) {
             blankEl.className = 'blank correct';
         } else {
@@ -500,21 +514,10 @@ function evaluateSecondStep() {
             allCorrect = false;
             mistakeCount++;
             mistakenWordsSet.add(targetWords[id]);
-            
-            const cards = document.querySelectorAll('.word-card');
-            cards.forEach(card => {
-                if (card.innerText === userAns) {
-                    card.className = 'word-card'; 
-                    card.draggable = true;
-                }
-            });
-            blankEl.innerText = '';
-            delete userAnswers[id];
         }
     }
 
     if (allCorrect) {
-        // 全問正解時は専用ファンファーレを鳴らす
         playSound('tada');
         showGameResult();
     } else {
@@ -524,7 +527,6 @@ function evaluateSecondStep() {
 
 function checkGameCompletion() {
     if (Object.keys(userAnswers).length === totalBlanksCount) {
-        // 1st Stepの最終正解時もファンファーレ
         setTimeout(() => {
             playSound('tada');
             showGameResult();
@@ -545,7 +547,6 @@ function showGameResult() {
 
     const listContainer = document.getElementById('res-mistake-list');
     listContainer.innerHTML = '';
-    
     if (mistakenWordsSet.size > 0) {
         document.getElementById('mistake-list-container').style.display = 'block';
         mistakenWordsSet.forEach(word => {
@@ -555,12 +556,11 @@ function showGameResult() {
             listContainer.appendChild(tag);
         });
     } else {
-        listContainer.innerHTML = '<span style="color: #2ec4b6; font-weight: bold;">なし！素晴らしいパフォーマンスです！</span>';
+        listContainer.innerHTML = '<span style="color: #8e24aa; font-weight: bold;">素晴らしい！間違いはありません。</span>';
     }
 
     showScreen('result-screen');
 }
 </script>
-
 </body>
 </html>
