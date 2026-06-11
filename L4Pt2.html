@@ -38,11 +38,13 @@
         /* タイマー表示 */
         .timer-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .timer-bar {
-            width: 70px; height: 8px; background-color: #e0e0e0;
+            width: 70px;
+            height: 8px; background-color: #e0e0e0;
             border-radius: 4px; overflow: hidden;
         }
         .timer-progress {
-            width: 100%; height: 100%; background-color: #ea4335;
+            width: 100%;
+            height: 100%; background-color: #ea4335;
         }
         .timer-text { font-size: 13px; color: #666; margin-top: 2px; text-align: left; }
 
@@ -50,12 +52,14 @@
         .form-group { margin-bottom: 12px; text-align: left; width: 85%; margin-left: auto; margin-right: auto; }
         .form-group label { font-size: 14px; color: #555; font-weight: bold; display: block; margin-bottom: 4px; }
         input[type="text"], input[type="number"] {
-            width: 100%; padding: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box;
+            width: 100%;
+            padding: 12px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box;
             -webkit-appearance: none;
         }
         
         .primary-btn {
-            background-color: #1a73e8; color: white; border: none;
+            background-color: #1a73e8;
+            color: white; border: none;
             padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px;
             cursor: pointer; margin-top: 15px; width: 85%;
             -webkit-appearance: none;
@@ -63,23 +67,28 @@
         
         /* クイズエリア */
         .word-area {
-            display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0;
+            display: flex;
+            justify-content: center; align-items: center; gap: 15px; margin: 20px 0;
         }
         .word { font-size: 38px; font-weight: bold; color: #1a73e8; word-break: break-all; }
         
         .audio-btn {
-            background-color: #f1f3f4; border: none; font-size: 24px; cursor: pointer;
+            background-color: #f1f3f4;
+            border: none; font-size: 24px; cursor: pointer;
             border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
         }
 
         /* 選択肢 2×2列（iPadのタッチ用に最適化） */
         .choices {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
         }
         .choice-btn {
-            background-color: #ffffff; border: 2px solid #dadce0; border-radius: 12px;
+            background-color: #ffffff;
+            border: 2px solid #dadce0; border-radius: 12px;
             padding: 20px 10px; font-size: 18px; font-weight: bold; cursor: pointer; 
-            text-align: center; min-height: 80px; box-sizing: border-box;
+            text-align: center; min-height: 80px;
+            box-sizing: border-box;
             display: flex; align-items: center; justify-content: center;
             -webkit-appearance: none; -webkit-tap-highlight-color: transparent;
         }
@@ -95,7 +104,8 @@
         /* 結果エリア */
         .score-display { font-size: 44px; font-weight: bold; color: #333; margin: 15px 0; }
         .perfect-record {
-            background-color: #e6f4ea; border: 2px solid #34a853; color: #137333;
+            background-color: #e6f4ea;
+            border: 2px solid #34a853; color: #137333;
             padding: 15px; border-radius: 8px; text-align: left; margin-top: 15px; font-size: 15px;
         }
         .perfect-title { font-size: 28px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #1b5e20; }
@@ -104,25 +114,23 @@
 <body>
 
 <div class="container">
-    <!-- 1. ログイン画面 -->
     <div id="screen-login" class="screen" style="display: block;">
         <h1>📝 L.4 Pt.2 単語テスト</h1>
         <div class="form-group">
             <label>クラス</label>
-            <input type="text" id="user-class" placeholder="例: 1年A組">
+            <input type="text" id="user-class" placeholder="例: 8, C2">
         </div>
         <div class="form-group">
             <label>出席番号</label>
-            <input type="number" id="user-number" placeholder="例: 15">
+            <input type="number" id="user-number" placeholder="例: 13">
         </div>
         <div class="form-group">
             <label>名前</label>
-            <input type="text" id="user-name" placeholder="例: 山田太郎">
+            <input type="text" id="user-name" placeholder="例: 寺部だい">
         </div>
         <button class="primary-btn" onclick="submitProfile()">テストを始める</button>
     </div>
 
-    <!-- 2. モード選択画面 -->
     <div id="screen-mode" class="screen">
         <h1>⚙️ モード選択</h1>
         <p style="color: #666; margin-bottom: 25px;">練習するモードを選んでください。</p>
@@ -130,7 +138,6 @@
         <button class="primary-btn" onclick="selectMode('ja-en')" style="background-color: #f4b400;">日 → 英 モード</button>
     </div>
 
-    <!-- 3. クイズ画面 -->
     <div id="screen-quiz" class="screen">
         <div class="timer-container">
             <div id="quiz-timer-container">
@@ -147,7 +154,6 @@
         <div class="result-msg" id="result-message"></div>
     </div>
 
-    <!-- 4. 結果画面 -->
     <div id="screen-result" class="screen">
         <h1>🏁 テスト終了</h1>
         <div class="score-display" id="score-text">0%</div>
@@ -198,15 +204,15 @@ including,～を含めて
 social problem,社会問題
 native people,先住民
 native,先住の
-`; // ↑↑↑ データの最後の行までここに挟んでください ↑↑↑
+`;
+    // ↑↑↑ データの最後の行までここに挟んでください ↑↑↑
 
     let userProfile = { class: '', number: '', name: '' };
     let originalList = [];
     let quizQueue = [];
     let allJapaneseAnswers = [];
     let allEnglishAnswers = []; 
-    let quizMode = 'en-ja'; 
-    
+    let quizMode = 'en-ja';
     let currentWordIndex = 0;
     let correctCount = 0;
     let attemptCount = 0;
@@ -218,7 +224,8 @@ native,先住の
     let isAnswered = false;
 
     let isMaleVoice = true;
-    let audioCtx = null; // iOS/iPadの音声ブロック解除・効果音生成用
+    let audioCtx = null;
+    let startTime = null;
 
     window.onload = function() {
         parseEmbeddedData(defaultCSVData);
@@ -264,7 +271,7 @@ native,先住の
         }
 
         userProfile = { class: uClass, number: uNumber, name: uName };
-        showScreen('screen-mode'); 
+        showScreen('screen-mode');
     }
 
     function selectMode(mode) {
@@ -279,6 +286,7 @@ native,先住の
         quizQueue = JSON.parse(JSON.stringify(originalList));
         quizQueue.sort(function() { return Math.random() - 0.5; });
 
+        startTime = new Date();
         showScreen('screen-quiz');
         nextQuestion();
     }
@@ -295,7 +303,6 @@ native,先住の
         isAnswered = false;
 
         isMaleVoice = Math.random() < 0.5;
-
         var currentWord = quizQueue[currentWordIndex];
         
         if (quizMode === 'en-ja') {
@@ -316,7 +323,6 @@ native,先住の
             }
         }
         choices.sort(function() { return Math.random() - 0.5; });
-
         var container = document.getElementById('choices-container');
         container.innerHTML = '';
         
@@ -342,14 +348,12 @@ native,先住の
             var utterance = new SpeechSynthesisUtterance(currentWord.en);
             utterance.lang = 'en-US';
             utterance.rate = 0.9;
-
             var voices = window.speechSynthesis.getVoices();
             var enVoices = voices.filter(function(v) { return v.lang.indexOf('en') === 0; });
 
             if (enVoices.length > 0) {
                 var maleKeywords = ['male', 'david', 'mark', 'daniel', 'aaron', 'george', 'ravi'];
                 var femaleKeywords = ['female', 'zira', 'samantha', 'karen', 'moira', 'hazel', 'susan', 'jessa'];
-
                 var maleVoices = enVoices.filter(function(v) {
                     var name = v.name.toLowerCase();
                     return maleKeywords.some(function(k) { return name.indexOf(k) !== -1; });
@@ -361,24 +365,22 @@ native,先住の
 
                 if (isMaleVoice && maleVoices.length > 0) {
                     utterance.voice = maleVoices[Math.floor(Math.random() * maleVoices.length)];
-                    utterance.pitch = 0.85; 
+                    utterance.pitch = 0.85;
                 } else if (!isMaleVoice && femaleVoices.length > 0) {
                     utterance.voice = femaleVoices[Math.floor(Math.random() * femaleVoices.length)];
-                    utterance.pitch = 1.15; 
+                    utterance.pitch = 1.15;
                 } else {
                     var randomVoice = enVoices[Math.floor(Math.random() * enVoices.length)];
                     utterance.voice = randomVoice;
-                    utterance.pitch = isMaleVoice ? 0.8 : 1.2; 
+                    utterance.pitch = isMaleVoice ? 0.8 : 1.2;
                 }
             } else {
                 utterance.pitch = isMaleVoice ? 0.8 : 1.2;
             }
-
             window.speechSynthesis.speak(utterance);
         }
     }
 
-    // iOS/iPadの音声ガードを解除するための初期化関数
     function initAudioContext() {
         if (!audioCtx) {
             let AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -393,7 +395,6 @@ native,先住の
         clearInterval(timerInterval);
         timeLeft = timeLimit;
         updateTimerDisplay();
-
         var updateInterval = 100;
         timerInterval = setInterval(function() {
             timeLeft -= updateInterval;
@@ -415,42 +416,42 @@ native,先住の
     function timeUp() {
         if (isAnswered) return;
         isAnswered = true;
-
         clearInterval(timerInterval);
         initAudioContext();
-        
+
         var currentWord = quizQueue[currentWordIndex];
         var correctAnswer = (quizMode === 'en-ja') ? currentWord.ja : currentWord.en;
         var buttons = document.querySelectorAll('.choice-btn');
+
         for (var i = 0; i < buttons.length; i++) {
             buttons[i].disabled = true;
             if (buttons[i].innerText === correctAnswer) {
                 buttons[i].classList.add('correct-choice');
             }
         }
-
         var resultDiv = document.getElementById('result-message');
         resultDiv.innerText = 'boo! (時間切れ)';
         resultDiv.className = 'result-msg wrong';
-
+        
         if (quizMode === 'ja-en') {
             speakCurrentWord();
         }
+        playEffectSound(false);
 
         currentWordIndex++;
-        autoNextTimeout = setTimeout(nextQuestion, 1000);
+        autoNextTimeout = setTimeout(nextQuestion, 1200);
     }
 
     function checkAnswer(selected, correct, selectedButton) {
         if (isAnswered) return;
         isAnswered = true;
-
         clearInterval(timerInterval);
-        initAudioContext(); // ボタンタップの瞬間にオーディオの権限を確保
-        
+        initAudioContext();
+
         var resultDiv = document.getElementById('result-message');
         var buttons = document.querySelectorAll('.choice-btn');
-        
+        var isCorrect = (selected === correct);
+
         for (var i = 0; i < buttons.length; i++) {
             buttons[i].disabled = true;
             if (buttons[i].innerText === correct) {
@@ -458,10 +459,11 @@ native,先住の
             }
         }
 
-        if (selected === correct) {
-            resultDiv.innerText = 'right!';
-            resultDiv.className = 'result-msg right';
+        if (isCorrect) {
             correctCount++;
+            selectedButton.classList.add('correct-choice');
+            resultDiv.innerText = 'Good!';
+            resultDiv.className = 'result-msg right';
         } else {
             selectedButton.classList.add('wrong-choice');
             resultDiv.innerText = 'boo!';
@@ -471,122 +473,138 @@ native,先住の
         if (quizMode === 'ja-en') {
             speakCurrentWord();
         }
+        playEffectSound(isCorrect);
 
         currentWordIndex++;
-        autoNextTimeout = setTimeout(nextQuestion, 1000);
+        autoNextTimeout = setTimeout(nextQuestion, 1200);
     }
 
-    function showResult() {
-        clearInterval(timerInterval);
-        clearTimeout(autoNextTimeout);
-        showScreen('screen-result');
-        
-        var scorePercent = Math.round((correctCount / quizQueue.length) * 100);
-        document.getElementById('score-text').innerText = scorePercent + '%';
-
-        var perfectArea = document.getElementById('perfect-area');
-        
-        if (scorePercent === 100) {
-            var now = new Date();
-            var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
-            
-            var modeText = (quizMode === 'en-ja') ? '英 → 日 モード' : '日 → 英 モード';
-            
-            // 100%時の表示データをセット
-            document.getElementById('record-mode').innerText = modeText;
-            document.getElementById('record-count').innerText = attemptCount;
-            document.getElementById('record-score').innerText = scorePercent + '%';
-            document.getElementById('record-time').innerText = timeStr;
-            document.getElementById('record-class').innerText = userProfile.class;
-            document.getElementById('record-number').innerText = userProfile.number;
-            document.getElementById('record-name').innerText = userProfile.name;
-            
-            perfectArea.style.display = 'block';
-
-            // 🎉 100%達成時の音声・SE演出
-            speakGreat();
-            playCelebrationSound();
-        } else {
-            perfectArea.style.display = 'none';
-        }
-    }
-
-    // 「Great!」の発音
-    function speakGreat() {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            var utterance = new SpeechSynthesisUtterance("Great!");
-            utterance.lang = 'en-US';
-            utterance.rate = 0.95;
-            utterance.pitch = 1.2; // 少し高めで嬉しそうに
-            window.speechSynthesis.speak(utterance);
-        }
-    }
-
-    // 拍手と口笛の効果音合成（Web Audio API）
-    function playCelebrationSound() {
+    function playEffectSound(isCorrect) {
+        if (!audioCtx) return;
         try {
-            initAudioContext();
-            if (!audioCtx) return;
-
-            let now = audioCtx.currentTime;
-            
-            // 1. 口笛（ピッチをヒュイーンと滑らかに上げて楽しげに表現）
-            playWhistle(audioCtx, now + 0.0);
-            playWhistle(audioCtx, now + 0.5);
-            
-            // 2. 拍手（ホワイトノイズに特定のフィルターをかけ、大量かつランダムに重ねる）
-            let bufferSize = audioCtx.sampleRate * 0.08; 
-            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            let data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = Math.random() * 2 - 1;
-            }
-            
-            // 約2.5秒間で70回パチパチとバラバラにトリガーする
-            for (let i = 0; i < 70; i++) {
-                let randTime = now + Math.random() * 2.3;
-                let source = audioCtx.createBufferSource();
-                source.buffer = buffer;
-                
-                let filter = audioCtx.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.value = 900 + Math.random() * 600; // 手を叩く周波数
-                filter.Q.value = 2.5;
-                
+            let t = audioCtx.currentTime;
+            if (isCorrect) {
+                // 正解音 (ピロリ〜ン風の綺麗な和音)
+                let osc1 = audioCtx.createOscillator();
+                let osc2 = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
-                let vol = 0.08 + Math.random() * 0.12;
-                gain.gain.setValueAtTime(vol, randTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, randTime + 0.04 + Math.random() * 0.04);
                 
-                source.connect(filter);
-                filter.connect(gain);
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                
+                osc1.frequency.setValueAtTime(523.25, t); // C5
+                osc1.frequency.setValueAtTime(659.25, t + 0.08); // E5
+                osc2.frequency.setValueAtTime(783.99, t + 0.08); // G5
+                
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.1, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+                
+                osc1.connect(gain);
+                osc2.connect(gain);
                 gain.connect(audioCtx.destination);
-                source.start(randTime);
+                
+                osc1.start(t);
+                osc2.start(t);
+                osc1.stop(t + 0.5);
+                osc2.stop(t + 0.5);
+            } else {
+                // 不正解音 (ブブー)
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(140, t);
+                osc.frequency.setValueAtTime(135, t + 0.15);
+                
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.08, t + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(t);
+                osc.stop(t + 0.4);
             }
         } catch(e) {
             console.log("Audio Error:", e);
         }
     }
 
-    function playWhistle(ctx, time) {
-        let osc = ctx.createOscillator();
-        let gain = ctx.createGain();
+    function showResult() {
+        clearInterval(timerInterval);
+        var scorePercent = Math.round((correctCount / quizQueue.length) * 100);
+        document.getElementById('score-text').innerText = scorePercent + "%";
+
+        var perfectArea = document.getElementById('perfect-area');
+        if (scorePercent === 100) {
+            perfectArea.style.display = 'block';
+            document.getElementById('record-mode').innerText = (quizMode === 'en-ja') ? '英 → 日' : '日 → 英';
+            document.getElementById('record-count').innerText = attemptCount;
+            document.getElementById('record-score').innerText = correctCount + " / " + quizQueue.length;
+            
+            var endTime = new Date();
+            var diffSec = Math.round((endTime - startTime) / 1000);
+            document.getElementById('record-time').innerText = diffSec + "秒";
+            
+            document.getElementById('record-class').innerText = userProfile.class;
+            document.getElementById('record-number').innerText = userProfile.number;
+            document.getElementById('record-name').innerText = userProfile.name;
+            
+            // 満点時のファンファーレ
+            playWhistleAndClap();
+        } else {
+            perfectArea.style.display = 'none';
+        }
+
+        showScreen('screen-result');
+    }
+
+    function playWhistleAndClap() {
+        if (!audioCtx) return;
+        let t = audioCtx.currentTime;
+        // ホイッスル音
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
         osc.type = 'sine';
-        
-        osc.frequency.setValueAtTime(1100, time);
-        osc.frequency.exponentialRampToValueAtTime(1900, time + 0.12);
-        osc.frequency.exponentialRampToValueAtTime(1400, time + 0.35);
-        
-        gain.gain.setValueAtTime(0, time);
-        gain.gain.linearRampToValueAtTime(0.12, time + 0.05);
-        gain.gain.linearRampToValueAtTime(0.12, time + 0.25);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
-        
+        osc.frequency.setValueAtTime(1100, t);
+        osc.frequency.exponentialRampToValueAtTime(1900, t + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(1400, t + 0.35);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.1, t + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
         osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(time);
-        osc.stop(time + 0.35);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.41);
+
+        // 簡易拍手音生成（ノイズフィルタ）
+        setTimeout(function() {
+            try {
+                for (let i = 0; i < 8; i++) {
+                    let randTime = audioCtx.currentTime + i * 0.08 + Math.random() * 0.03;
+                    let bufferSize = audioCtx.sampleRate * 0.08;
+                    let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    let data = buffer.getChannelData(0);
+                    for (let j = 0; j < bufferSize; j++) {
+                        data[j] = Math.random() * 2 - 1;
+                    }
+                    let source = audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    let filter = audioCtx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 800 + Math.random() * 600;
+                    filter.Q.value = 2.5;
+                    let cGain = audioCtx.createGain();
+                    cGain.gain.setValueAtTime(0.06 + Math.random() * 0.05, randTime);
+                    cGain.gain.exponentialRampToValueAtTime(0.001, randTime + 0.06);
+                    source.connect(filter);
+                    filter.connect(cGain);
+                    cGain.connect(audioCtx.destination);
+                    source.start(randTime);
+                }
+            } catch(e){}
+        }, 300);
     }
 
     function restartQuiz() {
