@@ -6,10 +6,13 @@
     <title>動詞の時制問題</title>
     <style>
         :root {
-            --primary-color: #4a90e2;
+            /* 紫ベースのカラーパレット */
+            --primary-color: #6b46c1;    /* 深みのあるパープル */
+            --primary-light: #9f7aea;    /* 明るめのパープル */
+            --primary-bg: #faf5ff;       /* 薄い紫の背景 */
             --success-color: #2ec4b6;
-            --error-color: #e71d36;
-            --bg-color: #f4f7f6;
+            --error-color: #e71d36;      /* 強調・エラー用の赤 */
+            --bg-color: #f3f0f7;         /* 全体の背景（ほんのり紫） */
         }
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -23,22 +26,23 @@
         }
         .container {
             background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(107, 70, 193, 0.15);
             padding: 30px;
             width: 100%;
             max-width: 600px;
             box-sizing: border-box;
             text-align: center;
             position: relative;
+            border-top: 6px solid var(--primary-color);
         }
         h1 {
-            color: #333;
+            color: #2d3748;
             margin-bottom: 5px;
             font-size: 24px;
         }
         .subtitle {
-            color: #666;
+            color: #718096;
             margin-bottom: 25px;
             font-size: 14px;
         }
@@ -54,36 +58,38 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: #555;
+            color: #4a5568;
         }
         input[type="text"] {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
             font-size: 16px;
             box-sizing: border-box;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
         input[type="text"]:focus {
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.2);
             outline: none;
         }
         .action-btn {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 24px;
             font-size: 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: opacity 0.2s;
             width: 100%;
             margin-top: 15px;
             font-weight: bold;
+            box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
         }
         .action-btn:hover {
-            background-color: #357abd;
+            opacity: 0.9;
         }
         
         /* タイマーと進行状況のヘッダー */
@@ -95,20 +101,23 @@
         }
         .progress {
             font-size: 14px;
-            color: #888;
+            color: #718096;
+            font-weight: bold;
         }
         .timer-box {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            color: #333;
-            background-color: #edf2f7;
-            padding: 5px 12px;
+            color: var(--primary-color);
+            background-color: var(--primary-bg);
+            padding: 6px 14px;
             border-radius: 20px;
             min-width: 80px;
+            border: 1px solid #e9d8fd;
         }
         .timer-warn {
             color: var(--error-color);
             background-color: #ffebeb;
+            border-color: #fed7d7;
             animation: blink 0.5s infinite alternate;
         }
         @keyframes blink {
@@ -119,10 +128,19 @@
         .question-text {
             font-size: 20px;
             font-weight: bold;
-            color: #222;
-            margin: 20px 0;
+            color: #2d3748;
+            margin: 25px 0;
             line-height: 1.6;
             min-height: 50px;
+        }
+
+        /* ヒント連動の赤字スタイル */
+        .hint-target {
+            color: inherit; /* 最初は親要素の色（黒）を引き継ぐ */
+            transition: color 0.3s ease;
+        }
+        .hint-target.is-active {
+            color: var(--error-color); /* ヒント開放時に赤くなる */
         }
 
         /* ヒント関連 */
@@ -130,26 +148,30 @@
             margin-bottom: 20px;
         }
         .hint-toggle-btn {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            border: none;
-            padding: 6px 14px;
+            background-color: #f7fafc;
+            color: var(--primary-color);
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
             font-size: 13px;
-            border-radius: 4px;
+            border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.2s;
         }
         .hint-toggle-btn:hover {
-            background-color: #cbd5e1;
+            background-color: var(--primary-bg);
+            border-color: #d6bcfa;
         }
         .hint-box {
-            background-color: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 8px;
+            background-color: var(--primary-bg);
+            border: 1px dashed #b7791f; /* 少し目立たせるためのゴールド系、または紫 */
+            border-color: var(--primary-light);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
             font-size: 14px;
-            color: #475569;
+            color: #4a5568;
+            line-height: 1.5;
         }
 
         /* 2x2グリッド */
@@ -160,19 +182,20 @@
             margin-bottom: 20px;
         }
         .option-btn {
-            background-color: #f0f4f8;
-            border: 2px solid #cbd5e1;
-            color: #334155;
+            background-color: #fff;
+            border: 2px solid #e2e8f0;
+            color: #4a5568;
             padding: 20px 10px;
             font-size: 18px;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
             font-weight: bold;
         }
         .option-btn:hover:not(:disabled) {
-            background-color: #e2e8f0;
-            border-color: #94a3b8;
+            background-color: var(--primary-bg);
+            border-color: var(--primary-light);
+            color: var(--primary-color);
         }
         .option-btn:disabled {
             cursor: not-allowed;
@@ -192,11 +215,11 @@
         .result-score {
             font-size: 48px;
             font-weight: bold;
-            color: #333;
+            color: var(--primary-color);
             margin: 20px 0;
         }
         .result-info {
-            background-color: #f8fafc;
+            background-color: var(--primary-bg);
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 25px;
@@ -229,15 +252,15 @@
         <div class="subtitle">クラス、番号、氏名を入力してスタートしてください。</div>
         <div class="input-group">
             <label for="user-class">クラス</label>
-            <input type="text" id="user-class" placeholder="例: 1年A組" required>
+            <input type="text" id="user-class" placeholder="例: 8, C2" required>
         </div>
         <div class="input-group">
             <label for="user-number">番号</label>
-            <input type="text" id="user-number" placeholder="例: 15番" required>
+            <input type="text" id="user-number" placeholder="例: 13, D2" required>
         </div>
         <div class="input-group">
             <label for="user-name">氏名</label>
-            <input type="text" id="user-name" placeholder="例: 山田 太郎" required>
+            <input type="text" id="user-name" placeholder="例: 寺部 だい" required>
         </div>
         <button class="action-btn" onclick="startQuiz()">クイズを開始する</button>
     </div>
@@ -272,35 +295,31 @@
 </div>
 
 <script>
-// 問題データリスト（(A)などの記号と、日本語訳データを整理して登録しています）
 const masterQuestions = [
-    { q: "My father (        ) to work by train every morning.", ans: "goes", options: ["go", "goes", "is going", "went"], hint: "私の父は毎朝、電車で仕事に行きます。" },
-    { q: "Water (        ) at 100 degrees Celsius.", ans: "boils", options: ["boil", "boils", "is boiling", "boiled"], hint: "水は摂氏100度で沸騰します。" },
-    { q: "I usually (        ) breakfast at 7 o'clock.", ans: "eat", options: ["eat", "eats", "am eating", "ate"], hint: "私はたいてい7時に朝食を食べます。" },
-    { q: "We (        ) a great movie last night.", ans: "watched", options: ["watch", "watched", "were watching", "will watch"], hint: "私たちは昨夜、素晴らしい映画を見ました。" },
-    { q: "Alex (        ) to London three years ago.", ans: "moved", options: ["moves", "moved", "was moving", "has moved"], hint: "アレックスは3年前にロンドンへ引っ越しました。" },
-    { q: "When I was a child, I (        ) the piano.", ans: "played", options: ["play", "played", "am playing", "will play"], hint: "私が子供の頃、ピアノを弾いていました。" },
-    { q: "Look! It (        ) outside right now.", ans: "is snowing", options: ["snows", "is snowing", "was snowing", "will snow"], hint: "見て！ちょうど今、外で雪が降っているよ。" },
-    { q: "Listen! Someone (        ) the piano upstairs.", ans: "is playing", options: ["plays", "is playing", "are playing", "was playing"], hint: "聴いて！誰かが上の階でピアノを弾いているよ。" },
-    { q: "They (        ) for the exam at the library at the moment.", ans: "are studying", options: ["study", "is studying", "are studying", "were studying"], hint: "彼らは今、図書館で試験勉強をしています。" },
-    { q: "When you called me, I (        ) dinner.", ans: "was cooking", options: ["cooked", "am cooking", "was cooking", "were cooking"], hint: "あなたが私に電話をくれた時、私は夕食を作っているところでした。" },
-    { q: "At 9 o'clock yesterday morning, they (        ) tennis.", ans: "were playing", options: ["played", "was playing", "were playing", "are playing"], hint: "昨日の午前9時、彼らはテニスをしていました。" },
-    { q: "I (        ) TV when the electricity went out.", ans: "was watching", options: ["watched", "was watching", "am watching", "will be watching"], hint: "停電した時、私はテレビを見ているところでした。" },
-    { q: "We (        ) a party tomorrow evening.", ans: "will have", options: ["have", "had", "will have", "has"], hint: "私たちは明日の晩、パーティーを開く予定です。" },
-    { q: "I think it (        ) rainy next Sunday.", ans: "will be", options: ["is", "will", "will be", "was"], hint: "次の日曜日は雨が降ると思います。" },
-    { q: "I (        ) you with your homework later.", ans: "will help", options: ["help", "helped", "am helping", "will help"], hint: "あとで宿題を手伝ってあげるよ。" }
+    { q: "My father (        ) to work by train <hint>every morning</hint>.", ans: "goes", options: ["go", "goes", "is going", "went"], hint: "私の父は<hint>毎朝</hint>、電車で仕事に行きます。" },
+    { q: "Water (        ) <hint>at 100 degrees Celsius</hint>.", ans: "boils", options: ["boil", "boils", "is boiling", "boiled"], hint: "水は<hint>摂氏100度で</hint>沸騰します。" },
+    { q: "I <hint>usually</hint> (        ) breakfast at 7 o'clock.", ans: "eat", options: ["eat", "eats", "am eating", "ate"], hint: "私は<hint>たいてい</hint>7時に朝食を食べます。" },
+    { q: "We (        ) a great movie <hint>last night</hint>.", ans: "watched", options: ["watch", "watched", "were watching", "will watch"], hint: "私たちは<hint>昨夜</hint>、素晴らしい映画を見ました。" },
+    { q: "Alex (        ) to London <hint>three years ago</hint>.", ans: "moved", options: ["moves", "moved", "was moving", "has moved"], hint: "アレックスは<hint>3年前に</hint>ロンドンへ引っ越しました。" },
+    { q: "<hint>When I was a child</hint>, I (        ) the piano.", ans: "played", options: ["play", "played", "am playing", "will play"], hint: "<hint>私が子供の頃</hint>、ピアノを弾いていました。" },
+    { q: "Look! It (        ) outside <hint>right now</hint>.", ans: "is snowing", options: ["snows", "is snowing", "was snowing", "will snow"], hint: "見て！<hint>ちょうど今</hint>、外で雪が降っているよ。" },
+    { q: "<hint>Listen!</hint> Someone (        ) the piano upstairs.", ans: "is playing", options: ["plays", "is playing", "are playing", "was playing"], hint: "<hint>聴いて！</hint>誰かが上の階でピアノを弾いているよ。" },
+    { q: "They (        ) for the exam at the library <hint>at the moment</hint>.", ans: "are studying", options: ["study", "is studying", "are studying", "were studying"], hint: "彼らは<hint>今</hint>、図書館で試験勉強をしています。" },
+    { q: "<hint>When you called me</hint>, I (        ) dinner.", ans: "was cooking", options: ["cooked", "am cooking", "was cooking", "were cooking"], hint: "<hint>あなたが私に電話をくれた時</hint>、私は夕食を作っているところでした。" },
+    { q: "<hint>At 9 o'clock yesterday</hint> morning, they (        ) tennis.", ans: "were playing", options: ["played", "was playing", "were playing", "are playing"], hint: "<hint>昨日の午前9時</hint>、彼らはテニスをしていました。" },
+    { q: "I (        ) TV <hint>when the electricity went out</hint>.", ans: "was watching", options: ["watched", "was watching", "am watching", "will be watching"], hint: "<hint>停電した時</hint>、私はテレビを見ているところでした。" },
+    { q: "We (        ) a party <hint>tomorrow evening</hint>.", ans: "will have", options: ["have", "had", "will have", "has"], hint: "私たちは<hint>明日の晩</hint>、パーティーを開く予定です。" },
+    { q: "I think it (        ) rainy <hint>next Sunday</hint>.", ans: "will be", options: ["is", "will", "will be", "was"], hint: "<hint>次の日曜日は</hint>雨が降ると思います。" },
+    { q: "I (        ) you with your homework <hint>later</hint>.", ans: "will help", options: ["help", "helped", "am helping", "will help"], hint: "<hint>あとで</hint>宿題を手伝ってあげるよ。" }
 ];
 
 let questions = [];
 let currentQuestionIndex = 0;
 let correctCount = 0;
 let isAnswering = false;
-
-// タイマー用変数
 let timeLeft = 15;
 let timerInterval = null;
 
-// サウンド生成用オーディオコンテキスト
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
@@ -346,7 +365,6 @@ function playSound(type) {
     }
 }
 
-// シャッフル用関数
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -365,7 +383,6 @@ function startQuiz() {
         return;
     }
 
-    // 問題を丸ごとシャッフル
     questions = shuffle([...masterQuestions]);
     currentQuestionIndex = 0;
     correctCount = 0;
@@ -380,7 +397,6 @@ function startQuiz() {
 function showQuestion() {
     isAnswering = false;
     
-    // ヒントとフィードバックの初期化
     const hintBox = document.getElementById('hint-box');
     hintBox.classList.add('hidden');
     const feedbackBox = document.getElementById('feedback-box');
@@ -390,13 +406,17 @@ function showQuestion() {
     document.getElementById('progress-text').textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`;
     
     const currentQ = questions[currentQuestionIndex];
-    document.getElementById('question-box').textContent = currentQ.q;
-    hintBox.textContent = currentQ.hint;
 
-    // 選択肢の配列を複製してランダムにシャッフル
+    // ★変更箇所: データ内の <hint>~</hint> を、クラス名を持ったspanタグに置換する
+    const highlightBracket = (text) => {
+        return text.replace(/<hint>(.*?)<\/hint>/g, '<span class="hint-target">$1</span>');
+    };
+
+    document.getElementById('question-box').innerHTML = highlightBracket(currentQ.q);
+    hintBox.innerHTML = highlightBracket(currentQ.hint);
+
     const shuffledOptions = shuffle([...currentQ.options]);
 
-    // 2x2のグリッドボタンへ割り当て
     for (let i = 0; i < 4; i++) {
         const btn = document.getElementById(`opt${i}`);
         btn.textContent = shuffledOptions[i];
@@ -405,7 +425,6 @@ function showQuestion() {
         btn.disabled = false;
     }
 
-    // タイマーのリセットと起動
     resetAndStartTimer();
 }
 
@@ -426,7 +445,7 @@ function resetAndStartTimer() {
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            timeOutAction(); // 時間切れ時の処理
+            timeOutAction();
         }
     }, 1000);
 }
@@ -434,22 +453,30 @@ function resetAndStartTimer() {
 function toggleHint() {
     const hintBox = document.getElementById('hint-box');
     hintBox.classList.toggle('hidden');
+
+    // クイズ画面内のすべての「hint-target」を取得
+    const targets = document.querySelectorAll('.hint-target');
+    
+    // ヒントボックスが表示されている時は赤字クラス（is-active）を付与、隠れたら削除
+    if (!hintBox.classList.contains('hidden')) {
+        targets.forEach(el => el.classList.add('is-active'));
+    } else {
+        targets.forEach(el => el.classList.remove('is-active'));
+    }
 }
 
 function checkAnswer(clickedButton) {
     if (isAnswering) return;
     isAnswering = true;
-    clearInterval(timerInterval); // タイマー停止
+    clearInterval(timerInterval);
 
     const currentQ = questions[currentQuestionIndex];
     const feedbackBox = document.getElementById('feedback-box');
     const selectedText = clickedButton.textContent;
 
-    // 全ボタンを選択不可にする
     disableAllOptions();
 
     if (selectedText === currentQ.ans) {
-        // 正解
         correctCount++;
         feedbackBox.textContent = "right!";
         feedbackBox.className = "feedback right";
@@ -457,7 +484,6 @@ function checkAnswer(clickedButton) {
         clickedButton.style.borderColor = "var(--success-color)";
         playSound('right');
     } else {
-        // 不正解
         feedbackBox.textContent = "Boo!";
         feedbackBox.className = "feedback boo";
         clickedButton.style.backgroundColor = "#fed7d7";
@@ -469,7 +495,6 @@ function checkAnswer(clickedButton) {
     goToNextQuestion();
 }
 
-// 時間切れ（0秒）になった時の処理
 function timeOutAction() {
     isAnswering = true;
     disableAllOptions();
@@ -484,7 +509,6 @@ function timeOutAction() {
     goToNextQuestion();
 }
 
-// 正解のボタンを探して緑色の枠線をつける処理
 function highlightCorrectAnswer() {
     const currentQ = questions[currentQuestionIndex];
     for (let i = 0; i < 4; i++) {
@@ -503,7 +527,6 @@ function disableAllOptions() {
 }
 
 function goToNextQuestion() {
-    // 1.5秒後に次の画面へ
     setTimeout(() => {
         currentQuestionIndex++;
         if (currentQuestionIndex < questions.length) {
