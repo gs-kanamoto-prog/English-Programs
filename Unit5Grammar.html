@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>動詞の時制問題</title>
+    <title>動詞の時制問題 Unit 5</title>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -125,6 +125,15 @@
             min-height: 50px;
         }
 
+        /* ★追加: ヒント連動で文字を赤くするためのスタイル */
+        .hint-target {
+            color: inherit; /* 通常時は親要素と同じ色（黒など） */
+            transition: color 0.3s ease; /* 色の変化を滑らかに */
+        }
+        .hint-target.is-active {
+            color: var(--error-color); /* ヒント表示時に赤色に変化 */
+        }
+
         /* ヒント関連 */
         .hint-container {
             margin-bottom: 20px;
@@ -237,7 +246,7 @@
         </div>
         <div class="input-group">
             <label for="user-name">氏名</label>
-            <input type="text" id="user-name" placeholder="例: 寺部　だい" required>
+            <input type="text" id="user-name" placeholder="例: 寺部 だい" required>
         </div>
         <button class="action-btn" onclick="startQuiz()">クイズを開始する</button>
     </div>
@@ -272,28 +281,28 @@
 </div>
 
 <script>
-// 問題データリスト（(A)などの記号と、日本語訳データを整理して登録しています）
+// 問題データリスト（Unit 5のテキストファイルのもの）
 const masterQuestions = [
-    { q: "I (    ) my keys, so I can't get into my house now.", ans: "have lost", options: ["lost", "have lost", "had lost", "lose"], hint: "カギを無くしてしまったので、今家に入ることができませんー。" },
-    { q: "When we arrived at the cinema, the movie ( 　　) already started.", ans: "had", options: ["has", "had", "was", "did"], hint: "映画館に着いたら、もう映画は始まっていましたー。" },
-    { q: "Shakespeare (   ) many famous plays during his lifetime.", ans: "wrote", options: ["has written", "had written", "wrote", "writes"], hint: "シェイクスピアは生きている間に有名な芝居をたくさん書いたー。" },
-    { q: "She (   ) in Tokyo for five years before she moved to Kyoto last year.", ans: "had lived", options: ["lived", "has lived", "had lived", "lives"], hint: "彼女は京都に引っ越す前に東京で5年間暮らしていたー。" },
-    { q: "I (   ) him since we graduated from university.", ans: "haven't seen", options: ["didn't see", "haven't seen", "hadn't seen", "don't see"], hint: "大学を卒業して以来彼にはあっていませんー。" },
-    { q: "My family (   ) to Italy three times, and we want to go again.", ans: "have been", options: ["went", "have been", "had been", "go"], hint: "私たち家族はイタリアに3回行ったことがあり、また行きたいと思ってますー。" },
-    { q: "Yesterday, I (   ) up at 6:00, had breakfast, and went to work.", ans: "woke", options: ["woke", "have woken", "had woken", "wake"], hint: "昨日あたしは6時に起きて、朝食を食べ、仕事に行ったー。" },
-    { q: "He was very tired because he (   ) soccer for three hours.", ans: "had played", options: ["played", "has played", "had played", "plays"], hint: "彼はとても疲れていた、というのも3時間サッカーをしていたからだー。" },
-    { q: "(   ) you ever eaten raw fish before you came to Japan?", ans: "Had", options: ["Did", "Have", "Had", "Do"], hint: "日本に来る前に生魚を食べたことはありましたかー。" },
-    { q: "Technology (   ) a lot in the last few decades.", ans: "has changed", options: ["changed", "has changed", "had changed", "changes"], hint: "技術はここ数十年で大きく変わってきているー。" },
-    { q: "By the time the police arrived, the thief (   ) away.", ans: "had run", options: ["ran", "has run", "had run", "runs"], hint: "警察が到着するまでに、泥棒は逃げてしまったー。" },
-    { q: "I (   ) my homework yet, so I can't go out to play.", ans: "haven't finished", options: ["didn't finish", "haven't finished", "hadn't finished", "don't finish"], hint: "まだ宿題が終わっていないから、遊びに行けないー。" },
-    { q: "In 2018, they (   ) a new house in London.", ans: "bought", options: ["bought", "have bought", "had bought", "buy"], hint: "2018年、彼らはロンドンで新しい家を買ったー。" },
-    { q: "When I met her yesterday, she told me that she (   ) her purse the day before.", ans: "had lost", options: ["lost", "has lost", "had lost", "loses"], hint: "昨日彼女に会ったら、前の日に財布を失くしたと言っていたー。" },
-    { q: "Up to now, this project (   ) very successful.", ans: "has been", options: ["was", "has been", "had been", "is"], hint: "今までのところ、計画はばっちり上手く行っていますー。" },
-    { q: "When the bell rang, the teacher (   ) for 40 minutes.", ans: "had been talking", options: ["has been talking", "had been talking", "talks", "is talking"], hint: "チャイムが鳴ったとき、先生は40分間話し続けていたー。" },
-    { q: "The ground was wet this morning because it (   ) all night.", ans: "had been raining", options: ["has been raining", "had been raining", "rains", "is raining"], hint: "昨夜一晩中雨が降っていたから今朝地面が濡れていたー。" },
-    { q: "She (   ) for the bus for thirty minutes, and it still hasn't arrived.", ans: "has been waiting", options: ["was waiting", "has been waiting", "have been waiting", "had been waiting"], hint: "彼女は30分もバスを待っているのに、まだ来ないー。" },
-    { q: "He finally passed the exam. He (   ) for it for three years.", ans: "had been studying", options: ["has been studying", "had been studying", "studies", "is studying"], hint: "彼はやっと試験に受かった。3年間ずっと勉強していたねー。" },
-    { q: "My eyes hurt because I ( ) at the computer screen since this morning.", ans: "have been looking", options: ["looked", "had been looking", "have been looking", "look"], hint: "目が痛い、朝までコンピュータをずっと見ていたからだー。" },
+    { q: "I (    ) my keys, so I can't get into my house <hint>now</hint>.", ans: "have lost", options: ["lost", "have lost", "had lost", "lose"], hint: "カギを<hint>無くしてしまった</hint>ので、<hint>今</hint>家に入ることができませんー。" },
+    { q: "When we <hint>arrived</hint> at the cinema, the movie (   ) already started.", ans: "had", options: ["has", "had", "was", "did"], hint: "映画館に<hint>着いたら</hint>、もう映画は始まっていましたー。" },
+    { q: "<hint>Shakespeare</hint> (   ) many famous plays <hint>during his lifetime</hint>.", ans: "wrote", options: ["has written", "had written", "wrote", "writes"], hint: "<hint>シェイクスピア</hint>は<hint>生きている間に</hint>有名な芝居をたくさん書いたー。" },
+    { q: "She (   ) in Tokyo for five years <hint>before she moved to Kyoto last year</hint>.", ans: "had lived", options: ["lived", "has lived", "had lived", "lives"], hint: "彼女は<hint>昨年京都に引っ越す前に</hint>東京で5年間暮らしていたー。" },
+    { q: "I (   ) him <hint>since we graduated from university</hint>.", ans: "haven't seen", options: ["didn't see", "haven't seen", "hadn't seen", "don't see"], hint: "<hint>大学を卒業して以来</hint>彼にはあっていませんー。" },
+    { q: "My family (   ) to Italy <hint>three times</hint>, and we want to go again.", ans: "have been", options: ["went", "have been", "had been", "go"], hint: "私たち家族はイタリアに<hint>3回</hint>行ったことがあり、また行きたいと思ってますー。" },
+    { q: "<hint>Yesterday</hint>, I (   ) up at 6:00, <hint>had</hint> breakfast, and <hint>went</hint> to work.", ans: "woke", options: ["woke", "have woken", "had woken", "wake"], hint: "<hint>昨日</hint>あたしは6時に起きて、朝食を食べ、仕事に行ったー。" },
+    { q: "He <hint>was</hint> very tired because he (    ) soccer <hint>for three hours</hint>.", ans: "had played", options: ["played", "has played", "had played", "plays"], hint: "彼はとても<hint>疲れていた</hint>、というのも<hint>3時間</hint>サッカーをしていたからだー。" },
+    { q: "(   ) you ever eaten raw fish <hint>before you came to Japan</hint>?", ans: "Had", options: ["Did", "Have", "Had", "Do"], hint: "<hint>日本に来る前に</hint>生魚を食べたことはありましたかー。" },
+    { q: "Technology (   ) a lot <hint>in the last few decades</hint>.", ans: "has changed", options: ["changed", "has changed", "had changed", "changes"], hint: "技術は<hint>ここ数十年で</hint>大きく変わってきているー。" },
+    { q: "<hint>By the time the police arrived</hint>, the thief (   ) away.", ans: "had run", options: ["ran", "has run", "had run", "runs"], hint: "<hint>警察が到着するまでに</hint>、泥棒は逃げてしまったー。" },
+    { q: "I (   ) my homework <hint>yet</hint>, so I <hint>can't go out to play</hint>.", ans: "haven't finished", options: ["didn't finish", "haven't finished", "hadn't finished", "don't finish"], hint: "<hint>まだ</hint>宿題が終わっていないから、遊びに<hint>行けない</hint>ー。" },
+    { q: "<hint>In 2018</hint>, they (   ) a new house in London.", ans: "bought", options: ["bought", "have bought", "had bought", "buy"], hint: "<hint>2018年</hint>、彼らはロンドンで新しい家を買ったー。" },
+    { q: "When I met her <hint>yesterday</hint>, she told me that she (   ) her purse <hint>the day before</hint>.", ans: "had lost", options: ["lost", "has lost", "had lost", "loses"], hint: "<hint>昨日</hint>彼女に会ったら、<hint>前の日に</hint>財布を失くしたと言っていたー。" },
+    { q: "<hint>Up to now</hint>, this project (   ) very successful.", ans: "has been", options: ["was", "has been", "had been", "is"], hint: "<hint>今までのところ</hint>、計画はばっちり上手く行っていますー Rhodes。" },
+    { q: "<hint>When the bell rang</hint>, the teacher (   ) for 40 minutes.", ans: "had been talking", options: ["has been talking", "had been talking", "talks", "is talking"], hint: "<hint>チャイムが鳴ったとき</hint>、先生は40分間話し続けていたー。" },
+    { q: "The ground was wet <hint>this morning</hint> because it (   ) <hint>all night</hint>.", ans: "had been raining", options: ["has been raining", "had been raining", "rains", "is raining"], hint: "<hint>昨夜一晩中</hint>雨が降っていたから<hint>今朝</hint>地面が濡れていたー。" },
+    { q: "She (   ) for the bus <hint>for thirty minutes</hint>, and it <hint>still hasn't arrived</hint>.", ans: "has been waiting", options: ["was waiting", "has been waiting", "have been waiting", "had been waiting"], hint: "彼女は<hint>30分</hint>もバスを待っているのに、<hint>まだ来ない</hint>ー。" },
+    { q: "He finally <hint>passed</hint> the exam. He (   ) for it <hint>for three years</hint>.", ans: "had been studying", options: ["has been studying", "had been studying", "studies", "is studying"], hint: "彼はやっと試験に<hint>受かった</hint>。<hint>3年間</hint>ずっと勉強していたねー。" },
+    { q: "My eyes hurt because I (   ) at the computer screen <hint>since this morning</hint>.", ans: "have been looking", options: ["looked", "had been looking", "have been looking", "look"], hint: "目が痛い、<hint>朝から</hint>コンピュータをずっと見ていたからだー。" }
 ];
 
 let questions = [];
@@ -310,7 +319,7 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
     if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+         audioCtx.resume();
     }
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -393,10 +402,16 @@ function showQuestion() {
     feedbackBox.className = 'feedback';
 
     document.getElementById('progress-text').textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`;
-    
     const currentQ = questions[currentQuestionIndex];
-    document.getElementById('question-box').textContent = currentQ.q;
-    hintBox.textContent = currentQ.hint;
+
+    // ★変更箇所: テキスト内の <hint>~</hint> を専用のクラスを持った <span> に置き換える処理
+    const parseHintTags = (text) => {
+        return text.replace(/<hint>(.*?)<\/hint>/g, '<span class="hint-target">$1</span>');
+    };
+
+    // 以前の textContent から innerHTML での代入へと変更（タグを有効化するため）
+    document.getElementById('question-box').innerHTML = parseHintTags(currentQ.q);
+    hintBox.innerHTML = parseHintTags(currentQ.hint);
 
     // 選択肢の配列を複製してランダムにシャッフル
     const shuffledOptions = shuffle([...currentQ.options]);
@@ -436,9 +451,20 @@ function resetAndStartTimer() {
     }, 1000);
 }
 
+// ★変更箇所: ヒント表示のトグルと同時に、該当箇所にクラスを付け外しする
 function toggleHint() {
     const hintBox = document.getElementById('hint-box');
     hintBox.classList.toggle('hidden');
+
+    // 現在の画面内にあるすべての「hint-target（囲まれた部分）」を検出
+    const targets = document.querySelectorAll('.hint-target');
+    
+    // ヒントが開いている（hiddenが含まれない）なら赤字用のクラスを付与、閉じていれば削除
+    if (!hintBox.classList.contains('hidden')) {
+        targets.forEach(el => el.classList.add('is-active'));
+    } else {
+        targets.forEach(el => el.classList.remove('is-active'));
+    }
 }
 
 function checkAnswer(clickedButton) {
@@ -553,13 +579,12 @@ function showResult() {
     } else {
         resultTitle.className = "result-score";
         resultTitle.textContent = `正解率: ${accuracy}%`;
-        
         resultDetails.className = "result-info";
         resultDetails.innerHTML = `
             <strong>クラス:</strong> ${cls}<br>
             <strong>番号:</strong> ${num}<br>
             <strong>名前:</strong> ${name}<br>
-            <small style="color:#666;">（※制限時間内にたくさん正解して100%を目指そう！）</small>
+            <small style="color:#666;">（※制限時間内にたくさん正解して100%を目指しよう！）</small>
         `;
     }
 }
