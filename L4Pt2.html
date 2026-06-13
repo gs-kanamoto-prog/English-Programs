@@ -33,6 +33,7 @@
             border: 2px solid #fde293;
         }
         h1 { color: #443600; margin-top: 0; font-size: 24px; }
+        h2 { color: #555; font-size: 16px; margin: 15px 0 5px 0; text-align: left; padding-left: 8%; }
         
         /* 画面の表示・非表示コントロール */
         .screen { display: none; }
@@ -70,7 +71,7 @@
             background-color: #fbbc04;
             color: #333; border: none;
             padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px;
-            cursor: pointer; margin-top: 15px; width: 85%;
+            cursor: pointer; margin-top: 5px; width: 85%;
             -webkit-appearance: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: background 0.2s;
@@ -118,7 +119,8 @@
         .info-msg { color: #666; font-size: 16px; margin: 15px 0; font-weight: bold; }
         
         /* 結果エリア */
-        .score-display { font-size: 44px; font-weight: bold; color: #333; margin: 15px 0; }
+        .score-display { font-size: 44px; font-weight: bold; color: #333; margin: 5px 0; }
+        .fraction-display { font-size: 24px; color: #555; margin-bottom: 15px; font-weight: bold; }
         .perfect-record {
             background-color: #e6f4ea;
             border: 2px solid #34a853; color: #137333;
@@ -126,8 +128,14 @@
         }
         .perfect-title { font-size: 28px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #1b5e20; }
         .next-challenge-msg {
-            background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba; color: #856404;
             padding: 10px; margin-top: 10px; border-radius: 5px; font-weight: bold; text-align: center;
+        }
+        .limited-clear-msg {
+            background-color: #e8f0fe;
+            border: 1px solid #b4cffc; color: #1a73e8;
+            padding: 12px; margin: 15px 0; border-radius: 8px; font-weight: bold; text-align: center; font-size: 18px;
         }
     </style>
 </head>
@@ -138,25 +146,34 @@
         <h1>📝 L.4 Pt.2 単語テスト</h1>
         <div class="form-group">
             <label>クラス</label>
-            <input type="text" id="user-class" placeholder="例: 7">
+            <input type="text" id="user-class" placeholder="例: 8">
         </div>
         <div class="form-group">
             <label>出席番号</label>
-            <input type="number" id="user-number" placeholder="例: 45">
+            <input type="number" id="user-number" placeholder="例: 13">
         </div>
         <div class="form-group">
             <label>名前</label>
-            <input type="text" id="user-name" placeholder="例: 寺部曉">
+            <input type="text" id="user-name" placeholder="例: 山田風太郎">
         </div>
-        <button class="primary-btn" onclick="submitProfile()">テストを始める</button>
+        <button class="primary-btn" onclick="submitProfile()">さあ、始めよう</button>
     </div>
 
     <div id="screen-mode" class="screen">
         <h1>⚙️ モード選択</h1>
-        <p style="color: #666; margin-bottom: 25px;">練習するモードを選んでください。</p>
-        <button class="primary-btn" onclick="selectMode('en-ja')" style="background-color: #fbbc04; margin-bottom: 15px;">英 → 日 モード</button>
-        <button class="primary-btn" onclick="selectMode('ja-en')" style="background-color: #f4b400; margin-bottom: 15px;">日 → 英 モード</button>
-        <button class="primary-btn" onclick="selectMode('step-by-step')" style="background-color: #fff8e1; border: 2px solid #fbbc04; color: #e3a800; margin-bottom: 15px;">🐾 Step-by-Step mode (時間制限なし)</button>
+        <p style="color: #666; margin-bottom: 15px;">練習するモードを選んでください。</p>
+        
+        <h2>⏱️ 英 → 日 モード (時間制限あり)</h2>
+        <button class="primary-btn" onclick="selectMode('en-ja', 'all')" style="background-color: #fbbc04;">"All-Out-Attack" mode</button>
+        <button class="primary-btn" onclick="selectMode('en-ja', 'limited')" style="background-color: #fde293;">"Limited" mode</button>
+
+        <h2>⏱️ 日 → 英 モード (時間制限あり)</h2>
+        <button class="primary-btn" onclick="selectMode('ja-en', 'all')" style="background-color: #f4b400;">"All-Out-Attack" mode</button>
+        <button class="primary-btn" onclick="selectMode('ja-en', 'limited')" style="background-color: #fce8e6; color: #c5221f; border: 1px solid #ea4335;">"Limited" mode</button>
+
+        <h2>🐾 Step-by-Step mode (時間制限なし)</h2>
+        <button class="primary-btn" onclick="selectMode('step-by-step', 'all')" style="background-color: #fff8e1; border: 2px solid #fbbc04; color: #e3a800;">”All-Out-Attack” mode</button>
+        <button class="primary-btn" onclick="selectMode('step-by-step', 'limited')" style="background-color: #fafafa; border: 2px solid #ccc; color: #666;">"Limited" mode</button>
     </div>
 
     <div id="screen-quiz" class="screen">
@@ -178,13 +195,18 @@
     <div id="screen-result" class="screen">
         <h1>🏁 テスト終了</h1>
         <div class="score-display" id="score-text">0%</div>
+        <div class="fraction-display" id="fraction-text" style="display: none;">0 / 0</div>
         
+        <div id="limited-msg-area" class="limited-clear-msg" style="display: none;">
+            👑 100%！All-Out-Attackモードに挑戦しよう！
+        </div>
+
         <div id="step-msg-area" class="info-msg" style="display: none;">
-            もう一度？あるいはクイズに挑戦しよう
+            100%に向けて挑戦しよう！
         </div>
 
         <div id="perfect-area" style="display: none;">
-            <div class="perfect-title">🎉L.4 Pt.2 単語テスト🎉</div>
+            <div class="perfect-title">Lesson 4 Part.2 単語練習</div>
             <div class="perfect-record">
                 <p><strong>モード:</strong> <span id="record-mode"></span></p>
                 <p><strong>やった回数:</strong> <span id="record-count"></span> 回目</p>
@@ -199,12 +221,12 @@
             </div>
         </div>
         
-        <button class="primary-btn" id="restart-btn" onclick="restartQuiz()">もう一度挑戦する</button>
+        <button class="primary-btn" id="restart-btn" onclick="restartQuiz()">再挑戦</button>
     </div>
 </div>
 
 <script>
-    // ↓↓↓ L4Pt2html の単語データに差し替えました ↓↓↓
+    // ↓↓↓ 【先生用】ここにエクセルのデータを貼り付けてください ↓↓↓
     const defaultCSVData = `
 back,戻る
 university,大学
@@ -233,18 +255,25 @@ social problem,社会問題
 native people,先住民
 native,先住の
 `;
-    // ↑↑↑ データの最後の行まで ↑↑↑
+    // ↑↑↑ データの最後の行までここに挟んでください ↑↑↑
 
     let userProfile = { class: '', number: '', name: '' };
     let originalList = [];
     let quizQueue = [];
     let allJapaneseAnswers = [];
     let allEnglishAnswers = []; 
-    let quizMode = 'en-ja';
+    let quizMode = 'en-ja'; // 'en-ja', 'ja-en', 'step-by-step'
+    let prevQuizMode = '';   // モード切り替えを検知するための変数
+    let subMode = 'all';    // 'all', 'limited'
     let currentWordIndex = 0;
     let correctCount = 0;
     let attemptCount = 0;
 
+    // Limitedモード：現在のモードにおける累積正解（一発正解）の英単語を記録するSet
+    let globalCorrectWords = new Set();
+
+    // Limitedモード：最低3回で全単語が出題されるための「まだ出題されていない単語」を管理するリスト
+    let unaskedWordsPool = [];
     let timeLimit = 5000;
     let timeLeft = 5000;
     let timerInterval = null;
@@ -302,8 +331,17 @@ native,先住の
         showScreen('screen-mode');
     }
 
-    function selectMode(mode) {
+    function selectMode(mode, sub) {
         quizMode = mode;
+        subMode = sub;
+
+        // モードが変わった場合、正解の累積データと出題プールを完全にリセット
+        if (quizMode !== prevQuizMode) {
+            globalCorrectWords.clear();
+            unaskedWordsPool = []; 
+            prevQuizMode = quizMode; // 現在のモードを記憶
+        }
+
         startQuizSession();
     }
 
@@ -311,8 +349,49 @@ native,先住の
         attemptCount++;
         correctCount = 0;
         currentWordIndex = 0;
-        quizQueue = JSON.parse(JSON.stringify(originalList));
-        quizQueue.sort(function() { return Math.random() - 0.5; });
+
+        // 全問題数をシャッフルしたベースリストを作成
+        let shuffledOriginal = JSON.parse(JSON.stringify(originalList));
+        shuffledOriginal.sort(function() { return Math.random() - 0.5; });
+
+        if (subMode === 'limited') {
+            // 今回出題する問題数（全問題数の半分、端数切り捨て、最低1問）
+            let halfLength = Math.floor(originalList.length / 2);
+            if (halfLength < 1) halfLength = 1;
+
+            // 「未出題プール」が空、あるいは初期状態の場合は全単語をセット
+            if (unaskedWordsPool.length === 0) {
+                unaskedWordsPool = JSON.parse(JSON.stringify(originalList));
+                unaskedWordsPool.sort(function() { return Math.random() - 0.5; });
+            }
+
+            let selectedList = [];
+            // 1. まず未出題のプールから優先的に問題数を確保する
+            while (selectedList.length < halfLength && unaskedWordsPool.length > 0) {
+                selectedList.push(unaskedWordsPool.pop());
+            }
+
+            // 2. プールからだけでは問題数が足りない場合、全体のリストから重複しないように補填する
+            if (selectedList.length < halfLength) {
+                for (let i = 0; i < shuffledOriginal.length; i++) {
+                    let candidate = shuffledOriginal[i];
+                    // すでに選択されていないものを選ぶ
+                    let isAlreadySelected = selectedList.some(item => item.en === candidate.en);
+                    if (!isAlreadySelected) {
+                        selectedList.push(candidate);
+                    }
+                    if (selectedList.length === halfLength) break;
+                }
+            }
+
+            // 最後に今回のクイズキューをさらにランダムシャッフル
+            selectedList.sort(function() { return Math.random() - 0.5; });
+            quizQueue = selectedList;
+
+        } else {
+            // All-Out-Attack モードは全問出題
+            quizQueue = shuffledOriginal;
+        }
 
         showScreen('screen-quiz');
         nextQuestion();
@@ -329,7 +408,6 @@ native,先住の
         document.getElementById('quiz-progress').innerText = (currentWordIndex + 1) + " / " + quizQueue.length;
         isAnswered = false;
         isWrongWaiting = false;
-
         isMaleVoice = Math.random() < 0.5;
         var currentWord = quizQueue[currentWordIndex];
         
@@ -476,6 +554,7 @@ native,先住の
     }
 
     function checkAnswer(selected, correct, selectedButton) {
+        var currentWord = quizQueue[currentWordIndex];
         if (quizMode === 'step-by-step' && isWrongWaiting) {
             if (selected === correct) {
                 isWrongWaiting = false;
@@ -490,11 +569,9 @@ native,先住の
         initAudioContext();
         var resultDiv = document.getElementById('result-message');
         var buttons = document.querySelectorAll('.choice-btn');
-
         if (selected === correct) {
             isAnswered = true;
             clearInterval(timerInterval);
-            
             for (var i = 0; i < buttons.length; i++) {
                 buttons[i].disabled = true;
                 if (buttons[i].innerText === correct) {
@@ -504,6 +581,11 @@ native,先住の
             resultDiv.innerText = 'right!';
             resultDiv.className = 'result-msg right';
             correctCount++;
+
+            // Limitedモード時、一発正解の単語を累積Setに保存
+            if (subMode === 'limited') {
+                globalCorrectWords.add(currentWord.en);
+            }
 
             if (quizMode === 'ja-en') {
                 speakCurrentWord();
@@ -553,30 +635,75 @@ native,先住の
         clearTimeout(autoNextTimeout);
         showScreen('screen-result');
         
-        var scorePercent = Math.round((correctCount / quizQueue.length) * 100);
-        document.getElementById('score-text').innerText = scorePercent + '%';
-
+        var fractionDisplay = document.getElementById('fraction-text');
         var perfectArea = document.getElementById('perfect-area');
         var stepMsgArea = document.getElementById('step-msg-area');
         var challengeMsg = document.getElementById('challenge-msg');
+        var limitedMsgArea = document.getElementById('limited-msg-area');
         var restartBtn = document.getElementById('restart-btn');
 
+        fractionDisplay.style.display = 'none';
         perfectArea.style.display = 'none';
         stepMsgArea.style.display = 'none';
         challengeMsg.style.display = 'none';
+        limitedMsgArea.style.display = 'none';
 
-        if (quizMode === 'step-by-step') {
-            stepMsgArea.style.display = 'block';
-            restartBtn.innerText = 'モード選択にもどる';
-        } else {
-            restartBtn.innerText = 'もう一度挑戦する';
-            
-            if (scorePercent === 100) {
-                var now = new Date();
-                var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
-                var modeText = (quizMode === 'en-ja') ? '英 → 日 モード' : '日 → 英 モード';
+        // 共通タイムスタンプ
+        var now = new Date();
+        var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+
+        let modeText = '';
+        if(quizMode === 'en-ja') modeText = '英 → 日 モード';
+        if(quizMode === 'ja-en') modeText = '日 → 英 モード';
+        if(quizMode === 'step-by-step') modeText = 'Step-by-Step モード';
+
+        // --- Limited モード終了時の処理 ---
+        if (subMode === 'limited') {
+            // 【変更】全問題のうちの実質（累積）正解率と、実質正解数を分数で表示
+            var limitedScorePercent = Math.round((globalCorrectWords.size / originalList.length) * 100);
+            document.getElementById('score-text').innerText = limitedScorePercent + '%';
+
+            fractionDisplay.innerText = globalCorrectWords.size + " / " + originalList.length;
+            fractionDisplay.style.display = 'block';
+
+            // 全ての問題で実質正解が出た（累積が全問題数に達した）場合
+            if (globalCorrectWords.size >= originalList.length) {
+                document.getElementById('score-text').innerText = '100%';
+                limitedMsgArea.style.display = 'block';
+
+                // 【機能追加】結果表データを流し込んで表示
+                document.getElementById('record-mode').innerText = modeText + " (Limited)";
+                document.getElementById('record-count').innerText = attemptCount;
+                document.getElementById('record-score').innerText = '100% (累積クリア)';
+                document.getElementById('record-time').innerText = timeStr;
+                document.getElementById('record-class').innerText = userProfile.class;
+                document.getElementById('record-number').innerText = userProfile.number;
+                document.getElementById('record-name').innerText = userProfile.name;
                 
-                document.getElementById('record-mode').innerText = modeText;
+                perfectArea.style.display = 'block';
+
+                // 【変更】メッセージを切り替えて表示
+                challengeMsg.innerText = '次はAll-Out-Attackに挑戦しよう';
+                challengeMsg.style.display = 'block';
+                
+                speakGreat();
+                playCelebrationSound();
+            } else {
+                if (quizMode === 'step-by-step') {
+                    stepMsgArea.style.display = 'block';
+                }
+            }
+        }
+
+        // --- All-Out-Attack (通常) モード終了時の処理 ---
+        if (subMode === 'all') {
+            var scorePercent = Math.round((correctCount / quizQueue.length) * 100);
+            document.getElementById('score-text').innerText = scorePercent + '%';
+
+            if (quizMode === 'step-by-step') {
+                stepMsgArea.style.display = 'block';
+            } else if (scorePercent === 100) {
+                document.getElementById('record-mode').innerText = modeText + " (All-Out-Attack)";
                 document.getElementById('record-count').innerText = attemptCount;
                 document.getElementById('record-score').innerText = scorePercent + '%';
                 document.getElementById('record-time').innerText = timeStr;
@@ -585,12 +712,17 @@ native,先住の
                 document.getElementById('record-name').innerText = userProfile.name;
                 
                 perfectArea.style.display = 'block';
+
+                // 通常時は元のメッセージを表示
+                challengeMsg.innerText = '次は並べ替えに挑戦しよう';
                 challengeMsg.style.display = 'block';
                 
                 speakGreat();
                 playCelebrationSound();
             }
         }
+        
+        restartBtn.innerText = '再挑戦';
     }
 
     function speakGreat() {
@@ -612,7 +744,6 @@ native,先住の
             let now = audioCtx.currentTime;
             playWhistle(audioCtx, now + 0.0);
             playWhistle(audioCtx, now + 0.5);
-            
             let bufferSize = audioCtx.sampleRate * 0.08;
             let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             let data = buffer.getChannelData(0);
@@ -656,7 +787,7 @@ native,先住の
         gain.gain.setValueAtTime(0, time);
         gain.gain.linearRampToValueAtTime(0.12, time + 0.05);
         gain.gain.linearRampToValueAtTime(0.12, time + 0.25);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
+        gain.exponentialRampToValueAtTime(0.001, time + 0.35);
         
         osc.connect(gain);
         gain.connect(ctx.destination);
