@@ -41,13 +41,10 @@
         /* タイマー表示 */
         .timer-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .timer-bar {
-            width: 70px;
-            height: 8px; background-color: #e0e0e0;
-            border-radius: 4px; overflow: hidden;
+            width: 70px; height: 8px; background-color: #e0e0e0; border-radius: 4px; overflow: hidden;
         }
         .timer-progress {
-            width: 100%;
-            height: 100%; background-color: #ea4335;
+            width: 100%; height: 100%; background-color: #ea4335;
         }
         .timer-text { font-size: 13px; color: #666; margin-top: 2px; text-align: left; }
 
@@ -55,21 +52,17 @@
         .form-group { margin-bottom: 12px; text-align: left; width: 85%; margin-left: auto; margin-right: auto; }
         .form-group label { font-size: 14px; color: #555; font-weight: bold; display: block; margin-bottom: 4px; }
         input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 12px; border: 2px solid #fde293; border-radius: 8px; font-size: 16px; box-sizing: border-box;
+            width: 100%; padding: 12px; border: 2px solid #fde293; border-radius: 8px; font-size: 16px; box-sizing: border-box;
             -webkit-appearance: none;
             background-color: #fffde7;
         }
         input[type="text"]:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #fbbc04;
-            background-color: #fff;
+            outline: none; border-color: #fbbc04; background-color: #fff;
         }
         
         /* メインボタン（イエロー基調） */
         .primary-btn {
-            background-color: #fbbc04;
-            color: #333; border: none;
+            background-color: #fbbc04; color: #333; border: none;
             padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px;
             cursor: pointer; margin-top: 5px; width: 85%;
             -webkit-appearance: none;
@@ -82,25 +75,21 @@
         
         /* クイズエリア */
         .word-area {
-            display: flex;
-            justify-content: center; align-items: center; gap: 15px; margin: 20px 0;
+            display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0;
         }
         .word { font-size: 38px; font-weight: bold; color: #e3a800; word-break: break-all; }
         
         .audio-btn {
-            background-color: #fff8e1;
-            border: 1px solid #fde293; font-size: 24px; cursor: pointer;
+            background-color: #fff8e1; border: 1px solid #fde293; font-size: 24px; cursor: pointer;
             border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
         }
 
         /* 選択肢 2×2列（iPadのタッチ用に最適化） */
         .choices {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
         }
         .choice-btn {
-            background-color: #ffffff;
-            border: 2px solid #fde293; border-radius: 12px;
+            background-color: #ffffff; border: 2px solid #fde293; border-radius: 12px;
             padding: 20px 10px; font-size: 18px; font-weight: bold; cursor: pointer; 
             text-align: center; min-height: 80px;
             box-sizing: border-box;
@@ -122,21 +111,27 @@
         .score-display { font-size: 44px; font-weight: bold; color: #333; margin: 5px 0; }
         .fraction-display { font-size: 24px; color: #555; margin-bottom: 15px; font-weight: bold; }
         .perfect-record {
-            background-color: #e6f4ea;
-            border: 2px solid #34a853; color: #137333;
+            background-color: #e6f4ea; border: 2px solid #34a853; color: #137333;
             padding: 15px; border-radius: 8px; text-align: left; margin-top: 15px; font-size: 15px;
         }
         .perfect-title { font-size: 28px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #1b5e20; }
         .next-challenge-msg {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba; color: #856404;
+            background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404;
             padding: 10px; margin-top: 10px; border-radius: 5px; font-weight: bold; text-align: center;
         }
         .limited-clear-msg {
-            background-color: #e8f0fe;
-            border: 1px solid #b4cffc; color: #1a73e8;
+            background-color: #e8f0fe; border: 1px solid #b4cffc; color: #1a73e8;
             padding: 12px; margin: 15px 0; border-radius: 8px; font-weight: bold; text-align: center; font-size: 18px;
         }
+
+        /* 【新設】間違えた単語表示ボックスのスタイル */
+        .wrong-words-box {
+            background-color: #fdf2f2; border: 2px solid #f8b4b4; color: #9b1c1c;
+            padding: 15px; border-radius: 8px; text-align: left; margin-top: 20px; font-size: 15px;
+        }
+        .wrong-words-title { font-size: 17px; font-weight: bold; margin-bottom: 8px; color: #c81e1e; text-align: center; }
+        .wrong-words-list { padding-left: 20px; margin: 0; }
+        .wrong-words-list li { margin-bottom: 5px; word-break: break-all; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -220,8 +215,13 @@
                 次は並べ替えに挑戦しよう
             </div>
         </div>
+
+        <div id="wrong-words-area" class="wrong-words-box" style="display: none;">
+            <div class="wrong-words-title">⚠️ 間違えた単語リスト</div>
+            <ul id="wrong-words-list" class="wrong-words-list"></ul>
+        </div>
         
-        <button class="primary-btn" id="restart-btn" onclick="restartQuiz()">再挑戦</button>
+        <button class="primary-btn" id="restart-btn" onclick="restartQuiz()" style="margin-top: 20px;">再挑戦</button>
     </div>
 </div>
 
@@ -264,10 +264,13 @@ native,先住の
     let allEnglishAnswers = []; 
     let quizMode = 'en-ja'; // 'en-ja', 'ja-en', 'step-by-step'
     let prevQuizMode = '';   // モード切り替えを検知するための変数
-    let subMode = 'all';    // 'all', 'limited'
+    let subMode = 'all'; // 'all', 'limited'
     let currentWordIndex = 0;
     let correctCount = 0;
     let attemptCount = 0;
+
+    // 【新設】間違えた単語を記録する配列
+    let wrongWordsList = [];
 
     // Limitedモード：現在のモードにおける累積正解（一発正解）の英単語を記録するSet
     let globalCorrectWords = new Set();
@@ -283,7 +286,6 @@ native,先住の
 
     let isMaleVoice = true;
     let audioCtx = null;
-
     window.onload = function() {
         parseEmbeddedData(defaultCSVData);
         if ('speechSynthesis' in window) {
@@ -349,6 +351,7 @@ native,先住の
         attemptCount++;
         correctCount = 0;
         currentWordIndex = 0;
+        wrongWordsList = []; // セッション開始時に間違えた単語リストを初期化
 
         // 全問題数をシャッフルしたベースリストを作成
         let shuffledOriginal = JSON.parse(JSON.stringify(originalList));
@@ -532,6 +535,12 @@ native,先住の
         initAudioContext();
         
         var currentWord = quizQueue[currentWordIndex];
+
+        // 【機能追加】時間切れの単語を間違えた単語リストに登録（重複回避）
+        if (!wrongWordsList.some(item => item.en === currentWord.en)) {
+            wrongWordsList.push(currentWord);
+        }
+
         var correctAnswer = (quizMode === 'ja-en') ? currentWord.en : currentWord.ja;
         var buttons = document.querySelectorAll('.choice-btn');
         for (var i = 0; i < buttons.length; i++) {
@@ -594,6 +603,11 @@ native,先住の
             currentWordIndex++;
             autoNextTimeout = setTimeout(nextQuestion, 1000);
         } else {
+            // 【機能追加】誤答した単語を間違えた単語リストに登録（重複回避）
+            if (!wrongWordsList.some(item => item.en === currentWord.en)) {
+                wrongWordsList.push(currentWord);
+            }
+
             if (quizMode === 'step-by-step') {
                 selectedButton.classList.add('wrong-choice');
                 resultDiv.innerText = 'boo! 正解をタッチしよう';
@@ -641,17 +655,20 @@ native,先住の
         var challengeMsg = document.getElementById('challenge-msg');
         var limitedMsgArea = document.getElementById('limited-msg-area');
         var restartBtn = document.getElementById('restart-btn');
+        var wrongWordsArea = document.getElementById('wrong-words-area');
+        var wrongWordsListUl = document.getElementById('wrong-words-list');
 
         fractionDisplay.style.display = 'none';
         perfectArea.style.display = 'none';
         stepMsgArea.style.display = 'none';
         challengeMsg.style.display = 'none';
         limitedMsgArea.style.display = 'none';
+        wrongWordsArea.style.display = 'none';
+        wrongWordsListUl.innerHTML = '';
 
         // 共通タイムスタンプ
         var now = new Date();
         var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
-
         let modeText = '';
         if(quizMode === 'en-ja') modeText = '英 → 日 モード';
         if(quizMode === 'ja-en') modeText = '日 → 英 モード';
@@ -659,7 +676,6 @@ native,先住の
 
         // --- Limited モード終了時の処理 ---
         if (subMode === 'limited') {
-            // 【変更】全問題のうちの実質（累積）正解率と、実質正解数を分数で表示
             var limitedScorePercent = Math.round((globalCorrectWords.size / originalList.length) * 100);
             document.getElementById('score-text').innerText = limitedScorePercent + '%';
 
@@ -671,7 +687,6 @@ native,先住の
                 document.getElementById('score-text').innerText = '100%';
                 limitedMsgArea.style.display = 'block';
 
-                // 【機能追加】結果表データを流し込んで表示
                 document.getElementById('record-mode').innerText = modeText + " (Limited)";
                 document.getElementById('record-count').innerText = attemptCount;
                 document.getElementById('record-score').innerText = '100% (累積クリア)';
@@ -679,11 +694,14 @@ native,先住の
                 document.getElementById('record-class').innerText = userProfile.class;
                 document.getElementById('record-number').innerText = userProfile.number;
                 document.getElementById('record-name').innerText = userProfile.name;
-                
                 perfectArea.style.display = 'block';
 
-                // 【変更】メッセージを切り替えて表示
-                challengeMsg.innerText = '次はAll-Out-Attackに挑戦しよう';
+                // 【条件変更】100%時のメッセージ出し分け
+                if (quizMode === 'step-by-step') {
+                    challengeMsg.innerText = 'All-Out-Attackモードで挑戦しよう';
+                } else {
+                    challengeMsg.innerText = '次はAll-Out-Attackに挑戦しよう！';
+                }
                 challengeMsg.style.display = 'block';
                 
                 speakGreat();
@@ -700,9 +718,7 @@ native,先住の
             var scorePercent = Math.round((correctCount / quizQueue.length) * 100);
             document.getElementById('score-text').innerText = scorePercent + '%';
 
-            if (quizMode === 'step-by-step') {
-                stepMsgArea.style.display = 'block';
-            } else if (scorePercent === 100) {
+            if (scorePercent === 100) {
                 document.getElementById('record-mode').innerText = modeText + " (All-Out-Attack)";
                 document.getElementById('record-count').innerText = attemptCount;
                 document.getElementById('record-score').innerText = scorePercent + '%';
@@ -710,16 +726,33 @@ native,先住の
                 document.getElementById('record-class').innerText = userProfile.class;
                 document.getElementById('record-number').innerText = userProfile.number;
                 document.getElementById('record-name').innerText = userProfile.name;
-                
                 perfectArea.style.display = 'block';
 
-                // 通常時は元のメッセージを表示
-                challengeMsg.innerText = '次は並べ替えに挑戦しよう';
+                // 【条件変更】100%時のメッセージ出し分け
+                if (quizMode === 'step-by-step') {
+                    challengeMsg.innerText = '英→日モードで挑戦しよう';
+                } else {
+                    challengeMsg.innerText = '次は並べ替えに挑戦しよう';
+                }
                 challengeMsg.style.display = 'block';
                 
                 speakGreat();
                 playCelebrationSound();
+            } else {
+                if (quizMode === 'step-by-step') {
+                    stepMsgArea.style.display = 'block';
+                }
             }
+        }
+
+        // --- 【機能追加】全てのモード共通：間違えた語がある場合は最後に提示する ---
+        if (wrongWordsList.length > 0) {
+            wrongWordsList.forEach(function(word) {
+                var li = document.createElement('li');
+                li.innerText = word.en + " ： " + word.ja;
+                wrongWordsListUl.appendChild(li);
+            });
+            wrongWordsArea.style.display = 'block';
         }
         
         restartBtn.innerText = '再挑戦';
