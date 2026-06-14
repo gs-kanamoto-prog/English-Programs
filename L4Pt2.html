@@ -11,7 +11,6 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-            /* 全体を優しいイエロー背景に */
             background-color: #fef7e0;
             display: flex;
             justify-content: center;
@@ -33,7 +32,7 @@
             border: 2px solid #fde293;
         }
         h1 { color: #443600; margin-top: 0; font-size: 24px; }
-        h2 { color: #555; font-size: 16px; margin: 15px 0 5px 0; text-align: left; padding-left: 8%; }
+        h2 { color: #555; font-size: 15px; margin: 15px 0 8px 0; text-align: left; padding-left: 5%; border-left: 4px solid #fbbc04; }
         
         /* 画面の表示・非表示コントロール */
         .screen { display: none; }
@@ -48,7 +47,7 @@
         }
         .timer-text { font-size: 13px; color: #666; margin-top: 2px; text-align: left; }
 
-        /* 入力エリア（iPadのキーボード対策） */
+        /* 入力エリア */
         .form-group { margin-bottom: 12px; text-align: left; width: 85%; margin-left: auto; margin-right: auto; }
         .form-group label { font-size: 14px; color: #555; font-weight: bold; display: block; margin-bottom: 4px; }
         input[type="text"], input[type="number"] {
@@ -60,7 +59,7 @@
             outline: none; border-color: #fbbc04; background-color: #fff;
         }
         
-        /* メインボタン（イエロー基調） */
+        /* ボタン基本スタイル */
         .primary-btn {
             background-color: #fbbc04; color: #333; border: none;
             padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px;
@@ -71,6 +70,37 @@
         }
         .primary-btn:active {
             background-color: #e3a800;
+        }
+
+        /* モード選択画面用すっきりボタン配置 */
+        .mode-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            width: 90%;
+            margin: 0 auto;
+        }
+        .mode-sub-btn {
+            flex: 1;
+            padding: 12px 5px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            -webkit-appearance: none;
+        }
+        .mode-single-btn {
+            width: 90%;
+            padding: 12px 5px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            -webkit-appearance: none;
         }
         
         /* クイズエリア */
@@ -84,7 +114,7 @@
             border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
         }
 
-        /* 選択肢 2×2列（iPadのタッチ用に最適化） */
+        /* 選択肢 */
         .choices {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 15px;
         }
@@ -98,7 +128,6 @@
             color: #443600;
         }
         
-        /* 正解・不正解の装飾 */
         .choice-btn.correct-choice { background-color: #e6f4ea !important; border-color: #34a853 !important; color: #137333 !important; }
         .choice-btn.wrong-choice { background-color: #fce8e6 !important; border-color: #ea4335 !important; color: #c5221f !important; }
 
@@ -124,7 +153,7 @@
             padding: 12px; margin: 15px 0; border-radius: 8px; font-weight: bold; text-align: center; font-size: 18px;
         }
 
-        /* 【新設】間違えた単語表示ボックスのスタイル */
+        /* 間違えた単語表示ボックス */
         .wrong-words-box {
             background-color: #fdf2f2; border: 2px solid #f8b4b4; color: #9b1c1c;
             padding: 15px; border-radius: 8px; text-align: left; margin-top: 20px; font-size: 15px;
@@ -156,19 +185,22 @@
 
     <div id="screen-mode" class="screen">
         <h1>⚙️ モード選択</h1>
-        <p style="color: #666; margin-bottom: 15px;">練習するモードを選んでください。</p>
+        <p style="color: #666; margin-bottom: 15px; font-size: 14px;">練習するモードを選んでください。</p>
         
-        <h2>⏱️ 英 → 日 モード (時間制限あり)</h2>
-        <button class="primary-btn" onclick="selectMode('en-ja', 'all')" style="background-color: #fbbc04;">"All-Out-Attack" mode</button>
-        <button class="primary-btn" onclick="selectMode('en-ja', 'limited')" style="background-color: #fde293;">"Limited" mode</button>
+        <h2>⏱️ 英 → 日 モード (5秒制限)</h2>
+        <div class="mode-btn-group">
+            <button class="mode-sub-btn" onclick="selectMode('en-ja', 'all')" style="background-color: #fbbc04; color: #333;">All-Out-Attack</button>
+            <button class="mode-sub-btn" onclick="selectMode('en-ja', 'limited')" style="background-color: #fde293; color: #443600;">Limited</button>
+        </div>
 
-        <h2>⏱️ 日 → 英 モード (時間制限あり)</h2>
-        <button class="primary-btn" onclick="selectMode('ja-en', 'all')" style="background-color: #f4b400;">"All-Out-Attack" mode</button>
-        <button class="primary-btn" onclick="selectMode('ja-en', 'limited')" style="background-color: #fce8e6; color: #c5221f; border: 1px solid #ea4335;">"Limited" mode</button>
+        <h2>⏱️ 日 → 英 モード (5秒制限)</h2>
+        <button class="mode-single-btn" onclick="selectMode('ja-en', 'all')" style="background-color: #f4b400; color: #fff;">All-Out-Attack mode</button>
 
-        <h2>🐾 Step-by-Step mode (時間制限なし)</h2>
-        <button class="primary-btn" onclick="selectMode('step-by-step', 'all')" style="background-color: #fff8e1; border: 2px solid #fbbc04; color: #e3a800;">”All-Out-Attack” mode</button>
-        <button class="primary-btn" onclick="selectMode('step-by-step', 'limited')" style="background-color: #fafafa; border: 2px solid #ccc; color: #666;">"Limited" mode</button>
+        <h2>🐾 Step-by-Step モード (制限時間なし)</h2>
+        <div class="mode-btn-group">
+            <button class="mode-sub-btn" onclick="selectMode('step-by-step', 'all')" style="background-color: #fff8e1; border: 1px solid #fbbc04; color: #e3a800;">All-Out-Attack</button>
+            <button class="mode-sub-btn" onclick="selectMode('step-by-step', 'limited')" style="background-color: #fafafa; border: 1px solid #ccc; color: #666;">Limited</button>
+        </div>
     </div>
 
     <div id="screen-quiz" class="screen">
@@ -262,20 +294,15 @@ native,先住の
     let quizQueue = [];
     let allJapaneseAnswers = [];
     let allEnglishAnswers = []; 
-    let quizMode = 'en-ja'; // 'en-ja', 'ja-en', 'step-by-step'
-    let prevQuizMode = '';   // モード切り替えを検知するための変数
-    let subMode = 'all'; // 'all', 'limited'
+    let quizMode = 'en-ja'; 
+    let prevQuizMode = '';   
+    let subMode = 'all'; 
     let currentWordIndex = 0;
     let correctCount = 0;
     let attemptCount = 0;
+    let wrongWordsList = []; 
 
-    // 【新設】間違えた単語を記録する配列
-    let wrongWordsList = [];
-
-    // Limitedモード：現在のモードにおける累積正解（一発正解）の英単語を記録するSet
     let globalCorrectWords = new Set();
-
-    // Limitedモード：最低3回で全単語が出題されるための「まだ出題されていない単語」を管理するリスト
     let unaskedWordsPool = [];
     let timeLimit = 5000;
     let timeLeft = 5000;
@@ -337,11 +364,10 @@ native,先住の
         quizMode = mode;
         subMode = sub;
 
-        // モードが変わった場合、正解の累積データと出題プールを完全にリセット
         if (quizMode !== prevQuizMode) {
             globalCorrectWords.clear();
             unaskedWordsPool = []; 
-            prevQuizMode = quizMode; // 現在のモードを記憶
+            prevQuizMode = quizMode;
         }
 
         startQuizSession();
@@ -351,34 +377,28 @@ native,先住の
         attemptCount++;
         correctCount = 0;
         currentWordIndex = 0;
-        wrongWordsList = []; // セッション開始時に間違えた単語リストを初期化
+        wrongWordsList = []; 
 
-        // 全問題数をシャッフルしたベースリストを作成
         let shuffledOriginal = JSON.parse(JSON.stringify(originalList));
         shuffledOriginal.sort(function() { return Math.random() - 0.5; });
 
         if (subMode === 'limited') {
-            // 今回出題する問題数（全問題数の半分、端数切り捨て、最低1問）
             let halfLength = Math.floor(originalList.length / 2);
             if (halfLength < 1) halfLength = 1;
 
-            // 「未出題プール」が空、あるいは初期状態の場合は全単語をセット
             if (unaskedWordsPool.length === 0) {
                 unaskedWordsPool = JSON.parse(JSON.stringify(originalList));
                 unaskedWordsPool.sort(function() { return Math.random() - 0.5; });
             }
 
             let selectedList = [];
-            // 1. まず未出題のプールから優先的に問題数を確保する
             while (selectedList.length < halfLength && unaskedWordsPool.length > 0) {
                 selectedList.push(unaskedWordsPool.pop());
             }
 
-            // 2. プールからだけでは問題数が足りない場合、全体のリストから重複しないように補填する
             if (selectedList.length < halfLength) {
                 for (let i = 0; i < shuffledOriginal.length; i++) {
                     let candidate = shuffledOriginal[i];
-                    // すでに選択されていないものを選ぶ
                     let isAlreadySelected = selectedList.some(item => item.en === candidate.en);
                     if (!isAlreadySelected) {
                         selectedList.push(candidate);
@@ -387,12 +407,10 @@ native,先住の
                 }
             }
 
-            // 最後に今回のクイズキューをさらにランダムシャッフル
             selectedList.sort(function() { return Math.random() - 0.5; });
             quizQueue = selectedList;
 
         } else {
-            // All-Out-Attack モードは全問出題
             quizQueue = shuffledOriginal;
         }
 
@@ -536,7 +554,6 @@ native,先住の
         
         var currentWord = quizQueue[currentWordIndex];
 
-        // 【機能追加】時間切れの単語を間違えた単語リストに登録（重複回避）
         if (!wrongWordsList.some(item => item.en === currentWord.en)) {
             wrongWordsList.push(currentWord);
         }
@@ -591,7 +608,6 @@ native,先住の
             resultDiv.className = 'result-msg right';
             correctCount++;
 
-            // Limitedモード時、一発正解の単語を累積Setに保存
             if (subMode === 'limited') {
                 globalCorrectWords.add(currentWord.en);
             }
@@ -603,7 +619,6 @@ native,先住の
             currentWordIndex++;
             autoNextTimeout = setTimeout(nextQuestion, 1000);
         } else {
-            // 【機能追加】誤答した単語を間違えた単語リストに登録（重複回避）
             if (!wrongWordsList.some(item => item.en === currentWord.en)) {
                 wrongWordsList.push(currentWord);
             }
@@ -666,7 +681,6 @@ native,先住の
         wrongWordsArea.style.display = 'none';
         wrongWordsListUl.innerHTML = '';
 
-        // 共通タイムスタンプ
         var now = new Date();
         var timeStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate() + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
         let modeText = '';
@@ -682,7 +696,6 @@ native,先住の
             fractionDisplay.innerText = globalCorrectWords.size + " / " + originalList.length;
             fractionDisplay.style.display = 'block';
 
-            // 全ての問題で実質正解が出た（累積が全問題数に達した）場合
             if (globalCorrectWords.size >= originalList.length) {
                 document.getElementById('score-text').innerText = '100%';
                 limitedMsgArea.style.display = 'block';
@@ -696,7 +709,6 @@ native,先住の
                 document.getElementById('record-name').innerText = userProfile.name;
                 perfectArea.style.display = 'block';
 
-                // 【条件変更】100%時のメッセージ出し分け
                 if (quizMode === 'step-by-step') {
                     challengeMsg.innerText = 'All-Out-Attackモードで挑戦しよう';
                 } else {
@@ -713,7 +725,7 @@ native,先住の
             }
         }
 
-        // --- All-Out-Attack (通常) モード終了時の処理 ---
+        // --- All-Out-Attack モード終了時の処理 ---
         if (subMode === 'all') {
             var scorePercent = Math.round((correctCount / quizQueue.length) * 100);
             document.getElementById('score-text').innerText = scorePercent + '%';
@@ -728,7 +740,6 @@ native,先住の
                 document.getElementById('record-name').innerText = userProfile.name;
                 perfectArea.style.display = 'block';
 
-                // 【条件変更】100%時のメッセージ出し分け
                 if (quizMode === 'step-by-step') {
                     challengeMsg.innerText = '英→日モードで挑戦しよう';
                 } else {
@@ -745,7 +756,7 @@ native,先住の
             }
         }
 
-        // --- 【機能追加】全てのモード共通：間違えた語がある場合は最後に提示する ---
+        // 間違えた単語リストの提示
         if (wrongWordsList.length > 0) {
             wrongWordsList.forEach(function(word) {
                 var li = document.createElement('li');
