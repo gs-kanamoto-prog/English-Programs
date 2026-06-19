@@ -74,6 +74,43 @@
             box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.2);
             outline: none;
         }
+        
+        /* モード選択（並べて表示するスタイル） */
+        .mode-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        .mode-option {
+            flex: 1;
+            position: relative;
+        }
+        .mode-option input[type="radio"] {
+            display: none; /* 本物のラジオボタンは隠す */
+        }
+        .mode-label {
+            display: block;
+            background-color: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-option input[type="radio"]:checked + .mode-label {
+            border-color: var(--primary-color);
+            background-color: var(--primary-bg);
+            color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+        }
+        .mode-label:hover {
+            border-color: var(--primary-light);
+        }
+
         .action-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
@@ -136,11 +173,11 @@
 
         /* ヒント連動の赤字スタイル */
         .hint-target {
-            color: inherit; /* 最初は親要素の色（黒）を引き継ぐ */
+            color: inherit;
             transition: color 0.3s ease;
         }
         .hint-target.is-active {
-            color: var(--error-color); /* ヒント開放時に赤くなる */
+            color: var(--error-color);
         }
 
         /* ヒント関連 */
@@ -164,7 +201,7 @@
         }
         .hint-box {
             background-color: var(--primary-bg);
-            border: 1px dashed #b7791f; /* 少し目立たせるためのゴールド系、または紫 */
+            border: 1px dashed #b7791f;
             border-color: var(--primary-light);
             padding: 12px;
             border-radius: 8px;
@@ -246,10 +283,10 @@
 <body>
 
 <div class="container">
-    <h1>Unit4 動詞の時制問題</h1>
+    <h1>動詞の時制問題</h1>
     
     <div id="login-screen">
-        <div class="subtitle">クラス、番号、氏名を入力してスタートしてください。</div>
+        <div class="subtitle">クラス、番号、氏名、モードを入力してスタートしてください。</div>
         <div class="input-group">
             <label for="user-class">クラス</label>
             <input type="text" id="user-class" placeholder="例: 8, C2" required>
@@ -261,6 +298,19 @@
         <div class="input-group">
             <label for="user-name">氏名</label>
             <input type="text" id="user-name" placeholder="例: 寺部 だい" required>
+        </div>
+        <div class="input-group">
+            <label>モード</label>
+            <div class="mode-container">
+                <div class="mode-option">
+                    <input type="radio" id="mode-normal" name="quiz-mode" value="normal" checked>
+                    <label for="mode-normal" class="mode-label">通常モード<br><small>(制限時間あり)</small></label>
+                </div>
+                <div class="mode-option">
+                    <input type="radio" id="mode-step" name="quiz-mode" value="step-by-step">
+                    <label for="mode-step" class="mode-label">Step-by-Step<br><small>(制限時間なし)</small></label>
+                </div>
+            </div>
         </div>
         <button class="action-btn" onclick="startQuiz()">クイズを開始する</button>
     </div>
@@ -308,7 +358,7 @@ const masterQuestions = [
     { q: "<hint>When you called me</hint>, I (        ) dinner.", ans: "was cooking", options: ["cooked", "am cooking", "was cooking", "were cooking"], hint: "<hint>あなたが私に電話をくれた時</hint>、私は夕食を作っているところでした。" },
     { q: "<hint>At 9 o'clock yesterday</hint> morning, they (        ) tennis.", ans: "were playing", options: ["played", "was playing", "were playing", "are playing"], hint: "<hint>昨日の午前9時</hint>、彼らはテニスをしていました。" },
     { q: "I (        ) TV <hint>when the electricity went out</hint>.", ans: "was watching", options: ["watched", "was watching", "am watching", "will be watching"], hint: "<hint>停電した時</hint>、私はテレビを見ているところでした。" },
-    { q: "We (        ) a party <hint>tomorrow evening</hint>.", ans: "will have", options: ["have", "had", "will have", "has"], hint: "私たちは<hint>明日の晩</hint>、パーティーを開く予定です。" },
+    { q: "We (        ) a party <hint>tomorrow evening</hint>.", ans: "will have", options: ["have", "had", "will have", "has"], hint: "私たちは<hint>明日の晩</hint>、パーティーを開記する予定です。" },
     { q: "I think it (        ) rainy <hint>next Sunday</hint>.", ans: "will be", options: ["is", "will", "will be", "was"], hint: "<hint>次の日曜日は</hint>雨が降ると思います。" },
     { q: "I (        ) you with your homework <hint>later</hint>.", ans: "will help", options: ["help", "helped", "am helping", "will help"], hint: "<hint>あとで</hint>宿題を手伝ってあげるよ。" }
 ];
@@ -319,6 +369,7 @@ let correctCount = 0;
 let isAnswering = false;
 let timeLeft = 15;
 let timerInterval = null;
+let currentMode = "normal";
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -377,6 +428,9 @@ function startQuiz() {
     const cls = document.getElementById('user-class').value.trim();
     const num = document.getElementById('user-number').value.trim();
     const name = document.getElementById('user-name').value.trim();
+    
+    // ラジオボタンの選択値を取得
+    currentMode = document.querySelector('input[name="quiz-mode"]:checked').value;
 
     if (!cls || !num || !name) {
         alert('クラス、番号、氏名をすべて入力してください。');
@@ -407,7 +461,6 @@ function showQuestion() {
     
     const currentQ = questions[currentQuestionIndex];
 
-    // ★変更箇所: データ内の <hint>~</hint> を、クラス名を持ったspanタグに置換する
     const highlightBracket = (text) => {
         return text.replace(/<hint>(.*?)<\/hint>/g, '<span class="hint-target">$1</span>');
     };
@@ -430,8 +483,15 @@ function showQuestion() {
 
 function resetAndStartTimer() {
     clearInterval(timerInterval);
-    timeLeft = 15;
     const timerDisplay = document.getElementById('timer-display');
+
+    if (currentMode === 'step-by-step') {
+        timerDisplay.classList.add('hidden');
+        return; 
+    }
+
+    timerDisplay.classList.remove('hidden');
+    timeLeft = 15;
     timerDisplay.textContent = `残り ${timeLeft}秒`;
     timerDisplay.className = "timer-box";
 
@@ -454,10 +514,8 @@ function toggleHint() {
     const hintBox = document.getElementById('hint-box');
     hintBox.classList.toggle('hidden');
 
-    // クイズ画面内のすべての「hint-target」を取得
     const targets = document.querySelectorAll('.hint-target');
     
-    // ヒントボックスが表示されている時は赤字クラス（is-active）を付与、隠れたら削除
     if (!hintBox.classList.contains('hidden')) {
         targets.forEach(el => el.classList.add('is-active'));
     } else {
@@ -554,6 +612,8 @@ function showResult() {
 
     const now = new Date();
     const formattedDate = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${now.getHours()}時${now.getMinutes()}分`;
+    
+    const modeName = currentMode === 'step-by-step' ? 'Step-by-Step（時間制限なし）' : '通常モード（制限時間あり）';
 
     if (accuracy === 100) {
         resultTitle.className = "result-score perfect-text";
@@ -562,6 +622,7 @@ function showResult() {
         resultDetails.className = "result-info fanfare-bg";
         resultDetails.innerHTML = `
             <strong>【おめでとうございます！全問正解です】</strong><br>
+            <strong>モード:</strong> ${modeName}<br>
             <strong>日時:</strong> ${formattedDate}<br>
             <strong>クラス:</strong> ${cls}<br>
             <strong>番号:</strong> ${num}<br>
@@ -574,10 +635,11 @@ function showResult() {
         
         resultDetails.className = "result-info";
         resultDetails.innerHTML = `
+            <strong>モード:</strong> ${modeName}<br>
             <strong>クラス:</strong> ${cls}<br>
             <strong>番号:</strong> ${num}<br>
             <strong>名前:</strong> ${name}<br>
-            <small style="color:#666;">（※制限時間内にたくさん正解して100%を目指そう！）</small>
+            <small style="color:#666;">${currentMode === 'step-by-step' ? '（※じっくり考えて100%を目指しよう！）' : '（※制限時間内にたくさん正解して100%を目指そう！）'}</small>
         `;
     }
 }
