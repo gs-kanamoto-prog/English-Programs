@@ -58,7 +58,6 @@
       font-weight: bold;
     }
 
-    /* プログレスバー */
     .progress-container {
       width: 100%;
       max-width: 1100px;
@@ -99,7 +98,6 @@
       transform: scale(0.98);
     }
 
-    /* メイン学習画面: 左右2カラム */
     #game-screen {
       display: flex;
       width: 100%;
@@ -108,7 +106,6 @@
       align-items: flex-start;
     }
 
-    /* 左側: 本文テキストエリア */
     .game-left {
       flex: 1 1 60%;
       background: var(--card-bg);
@@ -134,7 +131,6 @@
       border-left: 4px solid var(--primary-purple);
     }
 
-    /* 文中のインタラクティブターゲット { } */
     .word-target {
       display: inline-block;
       padding: 2px 8px;
@@ -154,7 +150,6 @@
       color: white;
     }
 
-    /* フォーカス選択中のターゲット */
     .word-target.active {
       background-color: var(--target-active);
       color: white;
@@ -163,7 +158,6 @@
       transform: scale(1.05);
     }
 
-    /* 日本語に置き換わった状態 */
     .word-target.matched {
       background-color: var(--matched-bg);
       color: var(--matched-text);
@@ -189,7 +183,6 @@
       40%, 80% { transform: translateX(5px); }
     }
 
-    /* 右側: 日本語選択肢リスト */
     .game-right {
       flex: 1 1 40%;
       position: sticky;
@@ -244,7 +237,6 @@
       transform: scale(0.96);
     }
 
-    /* ポップアップモーダル */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -316,7 +308,6 @@
       background-color: #757575;
     }
 
-    /* レスポンシブ対応 */
     @media (max-width: 800px) {
       #game-screen {
         flex-direction: column;
@@ -336,26 +327,20 @@
     <div class="sub-title">文中の {英単語} をタップして、右側の日本語を選んで置き換えよう！</div>
   </header>
 
-  <!-- プログレスバー -->
   <div class="progress-container" id="progress-container">
     <div class="progress-bar" id="progress-bar"></div>
   </div>
 
-  <!-- メイン学習画面 -->
   <div id="game-screen">
-    <!-- 左側: 本文表示エリア -->
     <div class="game-left">
       <div class="sentence-list" id="sentence-list"></div>
     </div>
-
-    <!-- 右側: 日本語の選択肢 -->
     <div class="game-right">
       <div class="right-header">日本語の意味を選択</div>
       <div class="jp-options-grid" id="jp-options-grid"></div>
     </div>
   </div>
 
-  <!-- 結果モーダル -->
   <div class="modal-overlay" id="result-modal">
     <div class="modal-content">
       <h2>🎉 全文置換完了！</h2>
@@ -373,7 +358,6 @@
   </div>
 
   <script>
-    // 1. 本文データ（①〜⑨）
     const sentences = [
       "①In many {parts} of the world, people {celebrate} {Halloween} on October 31.",
       "②They {carve} {pumpkins} into {lanterns}, {dress up} in {crazy} {outfits}, and go {trick-or-treating}.",
@@ -386,31 +370,13 @@
       "⑨Let's look at its {origin} and history."
     ];
 
-    // 2. 日本語選択肢リスト
     const allJpOptions = [
-      "ハロウィーン",
-      "…を彫る",
-      "カボチャ",
-      "ランタン，ちょうちん",
-      "まともでない，変な",
-      "衣装",
-      "お菓子をねだりながら家々を回る",
-      "最近の，近頃の",
-      "仮装する",
-      "地域",
-      "お祝いする",
-      "秋",
-      "品揃え",
-      "参加する",
-      "市場(しじょう)",
-      "…を上回る",
-      "気にかける",
-      "意味",
-      "起源",
-      "提供する"
+      "ハロウィーン", "…を彫る", "カボチャ", "ランタン，ちょうちん", "まともでない，変な",
+      "衣装", "お菓子をねだりながら家々を回る", "最近の，近頃の", "仮装する", "地域",
+      "お祝いする", "秋", "品揃え", "参加する", "市場(しじょう)", "…を上回る",
+      "気にかける", "意味", "起源", "提供する"
     ];
 
-    // 3. 英文ターゲットと正解日本語のマッピング
     const targetMap = {
       "parts": ["地域"],
       "celebrate": ["お祝いする"],
@@ -441,7 +407,7 @@
     let wrongWords = new Set();
     let audioCtx = null;
 
-    // ページロード時に localStorage からユーザー情報を取得してゲーム開始
+    // 読み込み時に localStorage からユーザー情報を自動取得
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('userInfo');
       if (savedUser) {
@@ -454,7 +420,6 @@
       initGame();
     });
 
-    // Web Audio API によるサウンド再生
     function playSound(type) {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -503,7 +468,6 @@
       }
     }
 
-    // ゲーム初期化
     function initGame() {
       matchedCount = 0;
       wrongWords.clear();
@@ -511,7 +475,6 @@
       activeTargetId = null;
       document.getElementById('result-modal').style.display = 'none';
 
-      // 1. 文章パースとレンダリング
       const sentenceContainer = document.getElementById('sentence-list');
       sentenceContainer.innerHTML = '';
 
@@ -548,7 +511,6 @@
         sentenceContainer.appendChild(div);
       });
 
-      // ターゲットにクリックイベント付与
       targetsData.forEach(t => {
         const el = document.getElementById(`target-${t.id}`);
         if (el) {
@@ -556,7 +518,6 @@
         }
       });
 
-      // 2. 日本語選択肢の作成（ランダムシャッフル）
       const jpContainer = document.getElementById('jp-options-grid');
       jpContainer.innerHTML = '';
       
@@ -578,7 +539,6 @@
       updateProgressBar();
     }
 
-    // ターゲット指定選択
     function selectTarget(id) {
       const targetObj = targetsData.find(t => t.id === id);
       if (!targetObj || targetObj.isMatched) return;
@@ -597,7 +557,6 @@
       }
     }
 
-    // 日本語選択肢クリック処理
     function handleJpClick(selectedJp, btnEl) {
       if (activeTargetId === null) return;
 
@@ -616,7 +575,6 @@
         targetEl.classList.add('matched');
         targetEl.textContent = `【${selectedJp}】`;
 
-        // 正解したボタンを右側のリストから非表示化
         btnEl.style.display = 'none';
 
         updateProgressBar();
@@ -639,13 +597,11 @@
       }
     }
 
-    // プログレスバー更新
     function updateProgressBar() {
       const percent = (matchedCount / targetsData.length) * 100;
       document.getElementById('progress-bar').style.width = `${percent}%`;
     }
 
-    // ポップアップ表示
     function showResultModal() {
       playSound('fanfare');
       document.getElementById('res-class').textContent = userInfo.class || '未割り当て';
@@ -665,7 +621,6 @@
         wrongContainer.textContent = Array.from(wrongWords).join(', ');
       }
 
-      // 成績発表画面に「もう一度挑戦」と「終了」ボタンを並べて表示
       btnContainer.innerHTML = `
         <button class="btn btn-secondary" onclick="restartAll()">もう一度挑戦</button>
         <button class="btn" onclick="finishGame()">終了</button>
@@ -674,17 +629,14 @@
       document.getElementById('result-modal').style.display = 'flex';
     }
 
-    // 最初からやり直し
     function restartAll() {
       initGame();
     }
 
-    // 終了ボタンの処理（モーダルを閉じる）
     function finishGame() {
       document.getElementById('result-modal').style.display = 'none';
     }
 
-    // エスケープ関数
     function escapeHtml(str) {
       return str
         .replace(/&/g, "&amp;")
