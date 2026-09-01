@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6 Part 1 - 単語マッチングゲーム</title>
+  <style>
+    :root {
+      --primary-color: #4fc3f7;
+      --primary-dark: #0288d1;
+      --bg-color: #e0f7fa;
+      --card-bg: #ffffff;
+      --card-selected: #b2ebf2;
+      --text-color: #333333;
+      --correct-color: #81c784;
+      --wrong-color: #e57373;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', MeiRyo, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 10px;
+    }
+
+    h1 {
+      color: var(--primary-dark);
+      margin-bottom: 5px;
+      text-align: center;
+      font-size: 1.8rem;
+    }
+
+    .sub-title {
+      color: #555;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    /* 入力画面（Screen 1） */
+    #input-screen {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid var(--primary-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary-dark);
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* ゲーム画面（Screen 2）: 左右2カラム構造 */
+    #game-screen {
+      display: none;
+      width: 100%;
+      max-width: 1000px;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* 左側: カードエリア */
+    .game-left {
+      flex: 1 1 60%;
+      width: 100%;
+    }
+
+    /* 右側: 完成した表エリア */
+    .game-right {
+      flex: 1 1 40%;
+      width: 100%;
+      position: sticky;
+      top: 20px;
+    }
+
+    #completed-table-container {
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: block; /* 最初から配置エリアを用意 */
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+
+    table.matched-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table.matched-table th, table.matched-table td {
+      border: 1px solid #b2ebf2;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    table.matched-table th {
+      background-color: var(--primary-color);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    /* グリッド（カード置き場） */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      width: 100%;
+      justify-items: center;
+    }
+
+    /* 正方形の角丸カード */
+    .card {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background-color: var(--card-bg);
+      border: 3px solid var(--primary-color);
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 6px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+      word-break: break-word;
+    }
+
+    .card:hover {
+      border-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* 選択状態 */
+    .card.selected {
+      background-color: var(--card-selected);
+      border-color: var(--primary-dark);
+      transform: scale(1.03);
+    }
+
+    /* 間違いアニメーション */
+    .card.wrong {
+      background-color: var(--wrong-color);
+      color: white;
+      animation: shake 0.3s;
+    }
+
+    /* 消滅アニメーション */
+    .card.hidden {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* ポップアップモーダル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+
+    .modal-content h2 {
+      color: var(--primary-dark);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .result-item {
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .result-item strong {
+      color: #555;
+    }
+
+    .wrong-words-list {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 5px;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-buttons .btn {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    .btn-secondary {
+      background-color: #b0bec5;
+    }
+    .btn-secondary:hover {
+      background-color: #78909c;
+    }
+
+    /* レスポンシブ対応（幅が狭い端末では縦並び） */
+    @media (max-width: 700px) {
+      #game-screen {
+        flex-direction: column-reverse;
+      }
+      .game-right {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Lesson 6 Part 1</h1>
+  <div class="sub-title">日本語と英語をマッチングさせよう</div>
+
+  <!-- 入力画面 -->
+  <div id="input-screen">
+    <form id="user-form">
+      <div class="input-group">
+        <label for="class-input">組</label>
+        <input type="text" id="class-input" required placeholder="例: 7">
+      </div>
+      <div class="input-group">
+        <label for="number-input">番</label>
+        <input type="text" id="number-input" required placeholder="例: 15">
+      </div>
+      <div class="input-group">
+        <label for="name-input">氏名</label>
+        <input type="text" id="name-input" required placeholder="例: 寺部 曉">
+      </div>
+      <button type="submit" class="btn">スタート</button>
+    </form>
+  </div>
+
+  <!-- ゲーム画面（左右2カラム） -->
+  <div id="game-screen">
+    <!-- 左側：単語カードグリッド -->
+    <div class="game-left">
+      <div class="card-grid" id="card-grid"></div>
+    </div>
+
+    <!-- 右側：正解表（画面右側に配置） -->
+    <div class="game-right">
+      <div id="completed-table-container">
+        <table class="matched-table">
+          <thead>
+            <tr>
+              <th>英語</th>
+              <th>日本語</th>
+            </tr>
+          </thead>
+          <tbody id="matched-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 結果ポップアップ -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal-content">
+      <h2>🎉 お疲れ様でした！</h2>
+      <div class="result-item"><strong>レッスン番号:</strong> Lesson 6</div>
+      <div class="result-item"><strong>Part番号:</strong> Part 1</div>
+      <div class="result-item"><strong>組:</strong> <span id="res-class"></span></div>
+      <div class="result-item"><strong>番:</strong> <span id="res-number"></span></div>
+      <div class="result-item"><strong>氏名:</strong> <span id="res-name"></span></div>
+      <div class="result-item"><strong>成功日時:</strong> <span id="res-time"></span></div>
+      <div class="result-item" style="margin-top: 10px;">
+        <strong>間違った英単語:</strong>
+        <div class="wrong-words-list" id="res-wrong-words">なし</div>
+      </div>
+      <div class="modal-buttons" id="modal-buttons"></div>
+    </div>
+  </div>
+
+  <script>
+    // 全単語データ
+    const wordList = [
+      { id: 1, en: "Halloween", jp: "名 ハロウィーン" },
+      { id: 2, en: "carve", jp: "動 …を彫る" },
+      { id: 3, en: "pumpkin", jp: "名 カボチャ" },
+      { id: 4, en: "lantern", jp: "名 ランタン，ちょうちん" },
+      { id: 5, en: "crazy", jp: "形 まともでない，変な" },
+      { id: 6, en: "outfit", jp: "名 衣装" },
+      { id: 7, en: "trick-or-treat", jp: "動 お菓子をねだりながら家々を回る" },
+      { id: 8, en: "recent", jp: "形 最近の，近頃の" },
+      { id: 9, en: "top", jp: "動 …を上回る" },
+      { id: 10, en: "carve … into ～", jp: "…を彫って～を作る" },
+      { id: 11, en: "dress up", jp: "仮装する" }
+    ];
+
+    let currentWordList = [...wordList]; // 今回のゲームで使用する単語リスト
+    let userInfo = { class: '', number: '', name: '' };
+    let selectedCards = [];
+    let matchedCount = 0;
+    let wrongWords = new Set();
+    let audioCtx = null;
+
+    // Web Audio API による効果音再生
+    function playSound(type) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, now);
+        osc.frequency.setValueAtTime(880, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.setValueAtTime(130, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+    }
+
+    // フォーム送信処理
+    document.getElementById('user-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      userInfo.class = document.getElementById('class-input').value;
+      userInfo.number = document.getElementById('number-input').value;
+      userInfo.name = document.getElementById('name-input').value;
+
+      document.getElementById('input-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'flex';
+      
+      restartAll();
+    });
+
+    // ゲームの初期化（resetTable: 表をクリアするかどうか）
+    function initGame(resetTable = true) {
+      matchedCount = 0;
+      wrongWords.clear();
+      selectedCards = [];
+      if (resetTable) {
+        document.getElementById('matched-tbody').innerHTML = '';
+      }
+      document.getElementById('result-modal').style.display = 'none';
+
+      // 英語カードと日本語カードの作成
+      let cardsData = [];
+      currentWordList.forEach(item => {
+        cardsData.push({ id: item.id, text: item.en, type: 'en', pairText: item.jp });
+        cardsData.push({ id: item.id, text: item.jp, type: 'jp', pairText: item.en });
+      });
+
+      // ランダムシャッフル
+      for (let i = cardsData.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
+      }
+
+      // カード描画
+      const grid = document.getElementById('card-grid');
+      grid.innerHTML = '';
+      cardsData.forEach(data => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.textContent = data.text;
+        card.dataset.id = data.id;
+        card.dataset.type = data.type;
+        card.dataset.text = data.text;
+        card.addEventListener('click', () => handleCardClick(card));
+        grid.appendChild(card);
+      });
+    }
+
+    // カードクリック処理
+    function handleCardClick(card) {
+      if (card.classList.contains('hidden') || card.classList.contains('selected') || selectedCards.length >= 2) {
+        return;
+      }
+
+      card.classList.add('selected');
+      selectedCards.push(card);
+
+      if (selectedCards.length === 2) {
+        const [card1, card2] = selectedCards;
+        const isMatch = card1.dataset.id === card2.dataset.id && card1.dataset.type !== card2.dataset.type;
+
+        if (isMatch) {
+          playSound('correct');
+          setTimeout(() => {
+            card1.classList.add('hidden');
+            card2.classList.add('hidden');
+            
+            addMatchedRow(card1, card2);
+            matchedCount++;
+            selectedCards = [];
+
+            if (matchedCount === currentWordList.length) {
+              setTimeout(showResultModal, 500);
+            }
+          }, 300);
+
+        } else {
+          playSound('wrong');
+          card1.classList.add('wrong');
+          card2.classList.add('wrong');
+
+          // 間違えた単語オブジェクトを記録
+          selectedCards.forEach(c => {
+            const item = wordList.find(w => w.id == c.dataset.id);
+            if (item) wrongWords.add(item);
+          });
+
+          setTimeout(() => {
+            card1.classList.remove('selected', 'wrong');
+            card2.classList.remove('selected', 'wrong');
+            selectedCards = [];
+          }, 800);
+        }
+      }
+    }
+
+    // 右側の完成表に正解ペアを追記
+    function addMatchedRow(card1, card2) {
+      const enText = card1.dataset.type === 'en' ? card1.dataset.text : card2.dataset.text;
+      const jpText = card1.dataset.type === 'jp' ? card1.dataset.text : card2.dataset.text;
+
+      const tbody = document.getElementById('matched-tbody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${enText}</td><td>${jpText}</td>`;
+      tbody.appendChild(tr);
+    }
+
+    // クリア時のポップアップ表示
+    function showResultModal() {
+      document.getElementById('res-class').textContent = userInfo.class;
+      document.getElementById('res-number').textContent = userInfo.number;
+      document.getElementById('res-name').textContent = userInfo.name;
+
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+      document.getElementById('res-time').textContent = timeStr;
+
+      const wrongContainer = document.getElementById('res-wrong-words');
+      const btnContainer = document.getElementById('modal-buttons');
+      btnContainer.innerHTML = '';
+
+      if (wrongWords.size === 0) {
+        wrongContainer.textContent = 'なし（全問一発正解！）';
+        btnContainer.innerHTML = `
+          <button class="btn btn-secondary" onclick="restartAll()">最初からもう一度</button>
+          <button class="btn" onclick="nextProgram()">次の問題へ進む</button>
+        `;
+      } else {
+        const wrongListArray = Array.from(wrongWords);
+        wrongContainer.textContent = wrongListArray.map(w => w.en).join(', ');
+        btnContainer.innerHTML = `
+          <button class="btn" onclick="retryWrongOnly()">間違えた単語だけもう1回</button>
+        `;
+      }
+
+      document.getElementById('result-modal').style.display = 'flex';
+    }
+
+    // 間違えた単語だけで再挑戦（正解表は消さずに保持する）
+    function retryWrongOnly() {
+      currentWordList = Array.from(wrongWords);
+      initGame(false);
+    }
+
+    // 最初から（全単語で）再挑戦（表もリセット）
+    function restartAll() {
+      currentWordList = [...wordList];
+      initGame(true);
+    }
+
+    // 「次の問題へ進む」処理：L6Part1_voc2.html へ遷移
+    function nextProgram() {
+      window.location.href = "L6Part1_voc2.html";
+    }
+  </script>
+</body>
+</html>

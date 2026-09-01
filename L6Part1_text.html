@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6 Part 1 本文 - 単語置換学習</title>
+  <style>
+    :root {
+      --primary-purple: #7e57c2;
+      --primary-dark: #4a148c;
+      --primary-light: #ede7f6;
+      --accent-purple: #ab47bc;
+      --hover-purple: #673ab7;
+      --bg-color: #f4effa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --target-bg: #ea80fc;
+      --target-active: #d500f9;
+      --matched-bg: #e1bee7;
+      --matched-text: #4a148c;
+      --wrong-color: #ef5350;
+      --wrong-bg: #ffebee;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', MeiRyo, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 10px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    h1 {
+      color: var(--primary-dark);
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+
+    .sub-title {
+      color: #5e35b1;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    /* プログレスバー */
+    .progress-container {
+      width: 100%;
+      max-width: 1100px;
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      height: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-purple), var(--accent-purple));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .btn {
+      background-color: var(--primary-purple);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background-color: var(--hover-purple);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* メイン学習画面: 左右2カラム */
+    #game-screen {
+      display: flex;
+      width: 100%;
+      max-width: 1100px;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* 左側: 本文テキストエリア */
+    .game-left {
+      flex: 1 1 60%;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      border: 2px solid var(--primary-light);
+    }
+
+    .sentence-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #333;
+    }
+
+    .sentence-item {
+      padding: 8px 12px;
+      border-radius: 8px;
+      background-color: #faf7fc;
+      border-left: 4px solid var(--primary-purple);
+    }
+
+    /* 文中のインタラクティブターゲット { } */
+    .word-target {
+      display: inline-block;
+      padding: 2px 8px;
+      margin: 0 2px;
+      border-radius: 6px;
+      font-weight: bold;
+      background-color: var(--primary-light);
+      color: var(--primary-dark);
+      border: 2px dashed var(--primary-purple);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .word-target:hover {
+      background-color: var(--primary-purple);
+      color: white;
+    }
+
+    /* フォーカス選択中のターゲット */
+    .word-target.active {
+      background-color: var(--target-active);
+      color: white;
+      border-style: solid;
+      box-shadow: 0 0 8px rgba(213, 0, 249, 0.6);
+      transform: scale(1.05);
+    }
+
+    /* 日本語に置き換わった状態 */
+    .word-target.matched {
+      background-color: var(--matched-bg);
+      color: var(--matched-text);
+      border: 2px solid var(--primary-purple);
+      cursor: default;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .word-target.wrong-shake {
+      animation: shake 0.4s ease;
+      background-color: var(--wrong-color);
+      color: white;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* 右側: 日本語選択肢リスト */
+    .game-right {
+      flex: 1 1 40%;
+      position: sticky;
+      top: 20px;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      border: 2px solid var(--primary-light);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .right-header {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+      text-align: center;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary-light);
+    }
+
+    .jp-options-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .jp-option-btn {
+      background-color: #ffffff;
+      color: var(--primary-dark);
+      border: 2px solid var(--primary-purple);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+      user-select: none;
+    }
+
+    .jp-option-btn:hover {
+      background-color: var(--primary-purple);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .jp-option-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* ポップアップモーダル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(48, 15, 80, 0.6);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      text-align: left;
+      border: 3px solid var(--primary-purple);
+    }
+
+    .modal-content h2 {
+      color: var(--primary-dark);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .result-item {
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .result-item strong {
+      color: var(--primary-dark);
+    }
+
+    .wrong-words-list {
+      background: var(--wrong-bg);
+      border: 1px solid #ffcdd2;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 5px;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-buttons .btn {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    .btn-secondary {
+      background-color: #9e9e9e;
+    }
+    .btn-secondary:hover {
+      background-color: #757575;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 800px) {
+      #game-screen {
+        flex-direction: column;
+      }
+      .game-right {
+        position: static;
+        width: 100%;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Lesson 6 Part 1 本文</h1>
+    <div class="sub-title">文中の {英単語} をタップして、右側の日本語を選んで置き換えよう！</div>
+  </header>
+
+  <!-- プログレスバー -->
+  <div class="progress-container" id="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <!-- メイン学習画面 -->
+  <div id="game-screen">
+    <!-- 左側: 本文表示エリア -->
+    <div class="game-left">
+      <div class="sentence-list" id="sentence-list"></div>
+    </div>
+
+    <!-- 右側: 日本語の選択肢 -->
+    <div class="game-right">
+      <div class="right-header">日本語の意味を選択</div>
+      <div class="jp-options-grid" id="jp-options-grid"></div>
+    </div>
+  </div>
+
+  <!-- 結果モーダル -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal-content">
+      <h2>🎉 全文置換完了！</h2>
+      <div class="result-item"><strong>レッスン:</strong> Lesson 6 Part 1 本文</div>
+      <div class="result-item"><strong>組:</strong> <span id="res-class"></span></div>
+      <div class="result-item"><strong>番:</strong> <span id="res-number"></span></div>
+      <div class="result-item"><strong>氏名:</strong> <span id="res-name"></span></div>
+      <div class="result-item"><strong>達成日時:</strong> <span id="res-time"></span></div>
+      <div class="result-item" style="margin-top: 10px;">
+        <strong>間違えた単語:</strong>
+        <div class="wrong-words-list" id="res-wrong-words">なし（全問一発正解！）</div>
+      </div>
+      <div class="modal-buttons" id="modal-buttons"></div>
+    </div>
+  </div>
+
+  <script>
+    // 1. 本文データ（①〜⑨）
+    const sentences = [
+      "①In many {parts} of the world, people {celebrate} {Halloween} on October 31.",
+      "②They {carve} {pumpkins} into {lanterns}, {dress up} in {crazy} {outfits}, and go {trick-or-treating}.",
+      "③Here in Japan too, Halloween has become a big event in {recent} years.",
+      "④When {autumn} comes, shops and stores {offer} a wide {selection} of Halloween goods.",
+      "⑤Many of us enjoy Halloween at home with our family or have fun by {participating in} or watching street parties.",
+      "⑥The {market} size of Halloween is as large as that of Valentine's Day, only {topped} by Christmas.",
+      "⑦However, it seems that we don't know or {care about} the real {meaning} of Halloween.",
+      "⑧There's more to Halloween than just pumpkins, costumes, and parties.",
+      "⑨Let's look at its {origin} and history."
+    ];
+
+    // 2. 日本語選択肢リスト
+    const allJpOptions = [
+      "ハロウィーン",
+      "…を彫る",
+      "カボチャ",
+      "ランタン，ちょうちん",
+      "まともでない，変な",
+      "衣装",
+      "お菓子をねだりながら家々を回る",
+      "最近の，近頃の",
+      "仮装する",
+      "地域",
+      "お祝いする",
+      "秋",
+      "品揃え",
+      "参加する",
+      "市場(しじょう)",
+      "…を上回る",
+      "気にかける",
+      "意味",
+      "起源",
+      "提供する"
+    ];
+
+    // 3. 英文ターゲットと正解日本語のマッピング
+    const targetMap = {
+      "parts": ["地域"],
+      "celebrate": ["お祝いする"],
+      "Halloween": ["ハロウィーン"],
+      "carve": ["…を彫る"],
+      "pumpkins": ["カボチャ"],
+      "lanterns": ["ランタン，ちょうちん"],
+      "dress up": ["仮装する"],
+      "crazy": ["まともでない，変な"],
+      "outfits": ["衣装"],
+      "trick-or-treating": ["お菓子をねだりながら家々を回る"],
+      "recent": ["最近の，近頃の"],
+      "autumn": ["秋"],
+      "selection": ["品揃え"],
+      "participating in": ["参加する"],
+      "market": ["市場(しじょう)"],
+      "topped": ["…を上回る"],
+      "care about": ["気にかける"],
+      "meaning": ["意味"],
+      "origin": ["起源"],
+      "offer": ["提供する"]
+    };
+
+    let userInfo = { class: '', number: '', name: '' };
+    let targetsData = [];
+    let activeTargetId = null;
+    let matchedCount = 0;
+    let wrongWords = new Set();
+    let audioCtx = null;
+
+    // ページロード時に localStorage からユーザー情報を取得してゲーム開始
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('userInfo');
+      if (savedUser) {
+        try {
+          userInfo = JSON.parse(savedUser);
+        } catch(e) {
+          console.error("ユーザー情報の読み込みに失敗しました", e);
+        }
+      }
+      initGame();
+    });
+
+    // Web Audio API によるサウンド再生
+    function playSound(type) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.setValueAtTime(120, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'fanfare') {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.type = 'triangle';
+          o.frequency.value = freq;
+          g.gain.setValueAtTime(0.2, now + idx * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.4);
+          o.start(now + idx * 0.12);
+          o.stop(now + idx * 0.12 + 0.4);
+        });
+      }
+    }
+
+    // ゲーム初期化
+    function initGame() {
+      matchedCount = 0;
+      wrongWords.clear();
+      targetsData = [];
+      activeTargetId = null;
+      document.getElementById('result-modal').style.display = 'none';
+
+      // 1. 文章パースとレンダリング
+      const sentenceContainer = document.getElementById('sentence-list');
+      sentenceContainer.innerHTML = '';
+
+      let globalTargetId = 0;
+
+      sentences.forEach((sent) => {
+        const div = document.createElement('div');
+        div.className = 'sentence-item';
+
+        let htmlSnippet = '';
+        let lastIdx = 0;
+        const regex = /\{([^}]+)\}/g;
+        let match;
+
+        while ((match = regex.exec(sent)) !== null) {
+          htmlSnippet += escapeHtml(sent.substring(lastIdx, match.index));
+          
+          const rawWord = match[1];
+          globalTargetId++;
+          
+          targetsData.push({
+            id: globalTargetId,
+            en: rawWord,
+            jps: targetMap[rawWord] || [rawWord],
+            isMatched: false
+          });
+
+          htmlSnippet += `<span class="word-target" id="target-${globalTargetId}" data-id="${globalTargetId}">${escapeHtml(rawWord)}</span>`;
+          lastIdx = regex.lastIndex;
+        }
+        htmlSnippet += escapeHtml(sent.substring(lastIdx));
+
+        div.innerHTML = htmlSnippet;
+        sentenceContainer.appendChild(div);
+      });
+
+      // ターゲットにクリックイベント付与
+      targetsData.forEach(t => {
+        const el = document.getElementById(`target-${t.id}`);
+        if (el) {
+          el.addEventListener('click', () => selectTarget(t.id));
+        }
+      });
+
+      // 2. 日本語選択肢の作成（ランダムシャッフル）
+      const jpContainer = document.getElementById('jp-options-grid');
+      jpContainer.innerHTML = '';
+      
+      let shuffledJp = [...allJpOptions];
+      for (let i = shuffledJp.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledJp[i], shuffledJp[j]] = [shuffledJp[j], shuffledJp[i]];
+      }
+
+      shuffledJp.forEach((jpText) => {
+        const btn = document.createElement('button');
+        btn.className = 'jp-option-btn';
+        btn.textContent = jpText;
+        btn.addEventListener('click', () => handleJpClick(jpText, btn));
+        jpContainer.appendChild(btn);
+      });
+
+      selectTarget(1);
+      updateProgressBar();
+    }
+
+    // ターゲット指定選択
+    function selectTarget(id) {
+      const targetObj = targetsData.find(t => t.id === id);
+      if (!targetObj || targetObj.isMatched) return;
+
+      if (activeTargetId !== null) {
+        const prevEl = document.getElementById(`target-${activeTargetId}`);
+        if (prevEl && !prevEl.classList.contains('matched')) {
+          prevEl.classList.remove('active');
+        }
+      }
+
+      activeTargetId = id;
+      const currentEl = document.getElementById(`target-${id}`);
+      if (currentEl) {
+        currentEl.classList.add('active');
+      }
+    }
+
+    // 日本語選択肢クリック処理
+    function handleJpClick(selectedJp, btnEl) {
+      if (activeTargetId === null) return;
+
+      const currentTarget = targetsData.find(t => t.id === activeTargetId);
+      if (!currentTarget || currentTarget.isMatched) return;
+
+      const isCorrect = currentTarget.jps.includes(selectedJp);
+      const targetEl = document.getElementById(`target-${currentTarget.id}`);
+
+      if (isCorrect) {
+        playSound('correct');
+        currentTarget.isMatched = true;
+        matchedCount++;
+
+        targetEl.classList.remove('active');
+        targetEl.classList.add('matched');
+        targetEl.textContent = `【${selectedJp}】`;
+
+        // 正解したボタンを右側のリストから非表示化
+        btnEl.style.display = 'none';
+
+        updateProgressBar();
+
+        const nextTarget = targetsData.find(t => !t.isMatched);
+        if (nextTarget) {
+          selectTarget(nextTarget.id);
+        } else {
+          activeTargetId = null;
+          setTimeout(showResultModal, 500);
+        }
+      } else {
+        playSound('wrong');
+        wrongWords.add(currentTarget.en);
+
+        if (targetEl) {
+          targetEl.classList.add('wrong-shake');
+          setTimeout(() => targetEl.classList.remove('wrong-shake'), 400);
+        }
+      }
+    }
+
+    // プログレスバー更新
+    function updateProgressBar() {
+      const percent = (matchedCount / targetsData.length) * 100;
+      document.getElementById('progress-bar').style.width = `${percent}%`;
+    }
+
+    // ポップアップ表示
+    function showResultModal() {
+      playSound('fanfare');
+      document.getElementById('res-class').textContent = userInfo.class || '未割り当て';
+      document.getElementById('res-number').textContent = userInfo.number || '未割り当て';
+      document.getElementById('res-name').textContent = userInfo.name || '未割り当て';
+
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+      document.getElementById('res-time').textContent = timeStr;
+
+      const wrongContainer = document.getElementById('res-wrong-words');
+      const btnContainer = document.getElementById('modal-buttons');
+
+      if (wrongWords.size === 0) {
+        wrongContainer.textContent = 'なし（全問一発正解！）';
+      } else {
+        wrongContainer.textContent = Array.from(wrongWords).join(', ');
+      }
+
+      // 成績発表画面に「もう一度挑戦」と「終了」ボタンを並べて表示
+      btnContainer.innerHTML = `
+        <button class="btn btn-secondary" onclick="restartAll()">もう一度挑戦</button>
+        <button class="btn" onclick="finishGame()">終了</button>
+      `;
+
+      document.getElementById('result-modal').style.display = 'flex';
+    }
+
+    // 最初からやり直し
+    function restartAll() {
+      initGame();
+    }
+
+    // 終了ボタンの処理（モーダルを閉じる）
+    function finishGame() {
+      document.getElementById('result-modal').style.display = 'none';
+    }
+
+    // エスケープ関数
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
