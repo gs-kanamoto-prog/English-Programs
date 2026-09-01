@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 6 Part 1 その他 - 単語マッチングゲーム</title>
+  <title>Lesson 6 Part 1 その他 - 単語マッチングゲーム2</title>
   <style>
     :root {
       --primary-color: #4fc3f7;
@@ -70,7 +70,6 @@
       transform: scale(0.98);
     }
 
-    /* ゲーム画面: 左右2カラム構造（最初から表示） */
     #game-screen {
       display: flex;
       width: 100%;
@@ -79,13 +78,11 @@
       align-items: flex-start;
     }
 
-    /* 左側: カードエリア */
     .game-left {
       flex: 1 1 60%;
       width: 100%;
     }
 
-    /* 右側: 完成した表エリア */
     .game-right {
       flex: 1 1 40%;
       width: 100%;
@@ -124,7 +121,6 @@
       z-index: 1;
     }
 
-    /* グリッド（カード置き場） */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -133,7 +129,6 @@
       justify-items: center;
     }
 
-    /* 正方形の角丸カード */
     .card {
       width: 100%;
       aspect-ratio: 1 / 1;
@@ -159,21 +154,18 @@
       transform: translateY(-2px);
     }
 
-    /* 選択状態 */
     .card.selected {
       background-color: var(--card-selected);
       border-color: var(--primary-dark);
       transform: scale(1.03);
     }
 
-    /* 間違いアニメーション */
     .card.wrong {
       background-color: var(--wrong-color);
       color: white;
       animation: shake 0.3s;
     }
 
-    /* 消滅アニメーション */
     .card.hidden {
       visibility: hidden;
       opacity: 0;
@@ -189,7 +181,6 @@
       100% { transform: translateX(0); }
     }
 
-    /* ポップアップモーダル */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -259,7 +250,6 @@
       background-color: #78909c;
     }
 
-    /* レスポンシブ対応 */
     @media (max-width: 700px) {
       #game-screen {
         flex-direction: column-reverse;
@@ -275,14 +265,11 @@
   <h1>Lesson 6 Part 1 その他</h1>
   <div class="sub-title">日本語と英語をマッチングさせよう</div>
 
-  <!-- ゲーム画面（左右2カラム） -->
+  <!-- ゲーム画面 -->
   <div id="game-screen">
-    <!-- 左側：単語カードグリッド -->
     <div class="game-left">
       <div class="card-grid" id="card-grid"></div>
     </div>
-
-    <!-- 右側：正解表 -->
     <div class="game-right">
       <div id="completed-table-container">
         <table class="matched-table">
@@ -317,7 +304,6 @@
   </div>
 
   <script>
-    // 全単語データ (Part 1 その他)
     const wordList = [
       { id: 1, en: "parts", jp: "名 地域" },
       { id: 2, en: "celebrate", jp: "動 お祝いする" },
@@ -338,7 +324,7 @@
     let wrongWords = new Set();
     let audioCtx = null;
 
-    // ページロード時に localStorage からユーザー情報を取得してゲーム開始
+    // 読み込み時に localStorage から取得
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('userInfo');
       if (savedUser) {
@@ -351,7 +337,6 @@
       restartAll();
     });
 
-    // Web Audio API による効果音再生
     function playSound(type) {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -386,7 +371,6 @@
       }
     }
 
-    // ゲームの初期化
     function initGame(resetTable = true) {
       matchedCount = 0;
       wrongWords.clear();
@@ -396,20 +380,17 @@
       }
       document.getElementById('result-modal').style.display = 'none';
 
-      // 英語カードと日本語カードの作成
       let cardsData = [];
       currentWordList.forEach(item => {
         cardsData.push({ id: item.id, text: item.en, type: 'en', pairText: item.jp });
         cardsData.push({ id: item.id, text: item.jp, type: 'jp', pairText: item.en });
       });
 
-      // ランダムシャッフル
       for (let i = cardsData.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
       }
 
-      // カード描画
       const grid = document.getElementById('card-grid');
       grid.innerHTML = '';
       cardsData.forEach(data => {
@@ -424,7 +405,6 @@
       });
     }
 
-    // カードクリック処理
     function handleCardClick(card) {
       if (card.classList.contains('hidden') || card.classList.contains('selected') || selectedCards.length >= 2) {
         return;
@@ -471,7 +451,6 @@
       }
     }
 
-    // 右側の完成表に正解ペアを追記
     function addMatchedRow(card1, card2) {
       const enText = card1.dataset.type === 'en' ? card1.dataset.text : card2.dataset.text;
       const jpText = card1.dataset.type === 'jp' ? card1.dataset.text : card2.dataset.text;
@@ -482,7 +461,6 @@
       tbody.appendChild(tr);
     }
 
-    // クリア時のポップアップ表示
     function showResultModal() {
       document.getElementById('res-class').textContent = userInfo.class || '未割り当て';
       document.getElementById('res-number').textContent = userInfo.number || '未割り当て';
@@ -513,19 +491,16 @@
       document.getElementById('result-modal').style.display = 'flex';
     }
 
-    // 間違えた単語だけで再挑戦
     function retryWrongOnly() {
       currentWordList = Array.from(wrongWords);
       initGame(false);
     }
 
-    // 最初から再挑戦
     function restartAll() {
       currentWordList = [...wordList];
       initGame(true);
     }
 
-    // 「次の問題へ進む」処理：L6Part1_text.html へ遷移
     function nextProgram() {
       window.location.href = "L6Part1_text.html";
     }
