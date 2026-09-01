@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 6 Part 1 - 単語マッチングゲーム</title>
+  <title>Lesson 6 Part 1 - 単語マッチングゲーム1</title>
   <style>
     :root {
       --primary-color: #4fc3f7;
@@ -115,13 +115,11 @@
       align-items: flex-start;
     }
 
-    /* 左側: カードエリア */
     .game-left {
       flex: 1 1 60%;
       width: 100%;
     }
 
-    /* 右側: 完成した表エリア */
     .game-right {
       flex: 1 1 40%;
       width: 100%;
@@ -135,7 +133,7 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      display: block; /* 最初から配置エリアを用意 */
+      display: block;
       max-height: 75vh;
       overflow-y: auto;
     }
@@ -160,7 +158,6 @@
       z-index: 1;
     }
 
-    /* グリッド（カード置き場） */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -169,7 +166,6 @@
       justify-items: center;
     }
 
-    /* 正方形の角丸カード */
     .card {
       width: 100%;
       aspect-ratio: 1 / 1;
@@ -195,21 +191,18 @@
       transform: translateY(-2px);
     }
 
-    /* 選択状態 */
     .card.selected {
       background-color: var(--card-selected);
       border-color: var(--primary-dark);
       transform: scale(1.03);
     }
 
-    /* 間違いアニメーション */
     .card.wrong {
       background-color: var(--wrong-color);
       color: white;
       animation: shake 0.3s;
     }
 
-    /* 消滅アニメーション */
     .card.hidden {
       visibility: hidden;
       opacity: 0;
@@ -225,7 +218,6 @@
       100% { transform: translateX(0); }
     }
 
-    /* ポップアップモーダル */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -295,7 +287,6 @@
       background-color: #78909c;
     }
 
-    /* レスポンシブ対応（幅が狭い端末では縦並び） */
     @media (max-width: 700px) {
       #game-screen {
         flex-direction: column-reverse;
@@ -330,14 +321,11 @@
     </form>
   </div>
 
-  <!-- ゲーム画面（左右2カラム） -->
+  <!-- ゲーム画面 -->
   <div id="game-screen">
-    <!-- 左側：単語カードグリッド -->
     <div class="game-left">
       <div class="card-grid" id="card-grid"></div>
     </div>
-
-    <!-- 右側：正解表（画面右側に配置） -->
     <div class="game-right">
       <div id="completed-table-container">
         <table class="matched-table">
@@ -372,7 +360,6 @@
   </div>
 
   <script>
-    // 全単語データ
     const wordList = [
       { id: 1, en: "Halloween", jp: "名 ハロウィーン" },
       { id: 2, en: "carve", jp: "動 …を彫る" },
@@ -387,14 +374,26 @@
       { id: 11, en: "dress up", jp: "仮装する" }
     ];
 
-    let currentWordList = [...wordList]; // 今回のゲームで使用する単語リスト
+    let currentWordList = [...wordList];
     let userInfo = { class: '', number: '', name: '' };
     let selectedCards = [];
     let matchedCount = 0;
     let wrongWords = new Set();
     let audioCtx = null;
 
-    // Web Audio API による効果音再生
+    // 既存情報があればフォームを自動入力
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('userInfo');
+      if (savedUser) {
+        try {
+          const parsed = JSON.parse(savedUser);
+          document.getElementById('class-input').value = parsed.class || '';
+          document.getElementById('number-input').value = parsed.number || '';
+          document.getElementById('name-input').value = parsed.name || '';
+        } catch(e) {}
+      }
+    });
+
     function playSound(type) {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -429,12 +428,15 @@
       }
     }
 
-    // フォーム送信処理
+    // フォーム送信時に localStorage へ保存
     document.getElementById('user-form').addEventListener('submit', function(e) {
       e.preventDefault();
       userInfo.class = document.getElementById('class-input').value;
       userInfo.number = document.getElementById('number-input').value;
       userInfo.name = document.getElementById('name-input').value;
+
+      // localStorageにユーザー情報を保存
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
       document.getElementById('input-screen').style.display = 'none';
       document.getElementById('game-screen').style.display = 'flex';
@@ -442,7 +444,6 @@
       restartAll();
     });
 
-    // ゲームの初期化（resetTable: 表をクリアするかどうか）
     function initGame(resetTable = true) {
       matchedCount = 0;
       wrongWords.clear();
@@ -452,20 +453,17 @@
       }
       document.getElementById('result-modal').style.display = 'none';
 
-      // 英語カードと日本語カードの作成
       let cardsData = [];
       currentWordList.forEach(item => {
         cardsData.push({ id: item.id, text: item.en, type: 'en', pairText: item.jp });
         cardsData.push({ id: item.id, text: item.jp, type: 'jp', pairText: item.en });
       });
 
-      // ランダムシャッフル
       for (let i = cardsData.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [cardsData[i], cardsData[j]] = [cardsData[j], cardsData[i]];
       }
 
-      // カード描画
       const grid = document.getElementById('card-grid');
       grid.innerHTML = '';
       cardsData.forEach(data => {
@@ -480,7 +478,6 @@
       });
     }
 
-    // カードクリック処理
     function handleCardClick(card) {
       if (card.classList.contains('hidden') || card.classList.contains('selected') || selectedCards.length >= 2) {
         return;
@@ -513,7 +510,6 @@
           card1.classList.add('wrong');
           card2.classList.add('wrong');
 
-          // 間違えた単語オブジェクトを記録
           selectedCards.forEach(c => {
             const item = wordList.find(w => w.id == c.dataset.id);
             if (item) wrongWords.add(item);
@@ -528,7 +524,6 @@
       }
     }
 
-    // 右側の完成表に正解ペアを追記
     function addMatchedRow(card1, card2) {
       const enText = card1.dataset.type === 'en' ? card1.dataset.text : card2.dataset.text;
       const jpText = card1.dataset.type === 'jp' ? card1.dataset.text : card2.dataset.text;
@@ -539,7 +534,6 @@
       tbody.appendChild(tr);
     }
 
-    // クリア時のポップアップ表示
     function showResultModal() {
       document.getElementById('res-class').textContent = userInfo.class;
       document.getElementById('res-number').textContent = userInfo.number;
@@ -570,19 +564,16 @@
       document.getElementById('result-modal').style.display = 'flex';
     }
 
-    // 間違えた単語だけで再挑戦（正解表は消さずに保持する）
     function retryWrongOnly() {
       currentWordList = Array.from(wrongWords);
       initGame(false);
     }
 
-    // 最初から（全単語で）再挑戦（表もリセット）
     function restartAll() {
       currentWordList = [...wordList];
       initGame(true);
     }
 
-    // 「次の問題へ進む」処理：L6Part1_voc2.html へ遷移
     function nextProgram() {
       window.location.href = "L6Part1_voc2.html";
     }
