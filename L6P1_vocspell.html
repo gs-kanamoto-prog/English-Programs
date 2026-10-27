@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 8 Part 1 スペル選択クイズ</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    }
+    body {
+      background-color: #f4f7f6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #2c3e50;
+      margin-top: 0;
+    }
+    
+    /* 入力画面 */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    .btn-start, .btn-action, .btn-retry-mistakes {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+    .btn-start, .btn-action {
+      background-color: #3498db;
+    }
+    .btn-start:hover, .btn-action:hover {
+      background-color: #2980b9;
+    }
+    .btn-retry-mistakes {
+      background-color: #e67e22;
+    }
+    .btn-retry-mistakes:hover {
+      background-color: #d35400;
+    }
+
+    /* メインゲーム画面 */
+    .game-layout {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+    }
+    @media (max-width: 650px) {
+      .game-layout {
+        flex-direction: column;
+      }
+    }
+    .quiz-area {
+      flex: 3;
+      background-color: #fafafa;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    .list-area {
+      flex: 2;
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+    
+    .score-board {
+      font-size: 18px;
+      font-weight: bold;
+      color: #27ae60;
+      margin-bottom: 15px;
+    }
+    .jp-question {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      text-align: center;
+      min-height: 36px;
+    }
+    
+    /* 文字枠（下線ボックス）スタイリング */
+    .answer-display-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      min-height: 60px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .char-box {
+      width: 32px;
+      height: 42px;
+      border-bottom: 3px solid #3498db;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+      background-color: #fff;
+      border-radius: 4px 4px 0 0;
+    }
+    .char-box.space-box {
+      border-bottom: 2px dashed #bdc3c7;
+      background-color: transparent;
+      width: 20px;
+    }
+    
+    .simple-text-display {
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      color: #2980b9;
+      text-align: center;
+      min-height: 45px;
+      border-bottom: 2px dashed #bdc3c7;
+      padding-bottom: 5px;
+      width: 100%;
+    }
+
+    .hint-area {
+      color: #e67e22;
+      font-weight: bold;
+      text-align: center;
+      min-height: 24px;
+      margin-bottom: 15px;
+    }
+    .letter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .letter-btn {
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+      font-weight: bold;
+      background-color: #eef2f5;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .letter-btn:hover {
+      background-color: #3498db;
+      color: white;
+    }
+    .letter-btn:disabled {
+      background-color: #ddd;
+      border-color: #ccc;
+      color: #999;
+      cursor: not-allowed;
+    }
+    .control-btns {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-hint {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-speech {
+      background-color: #9b59b6;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-clear {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* 右側の獲得リスト表 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+
+    /* 画面3: 結果画面 */
+    .result-info {
+      background-color: #eaf2f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .mistake-list {
+      color: #c0392b;
+    }
+    
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 画面1: 入力画面 -->
+  <div id="screen-input">
+    <h1>Lesson 8 Part 1 単語クイズ</h1>
+    <div class="form-group">
+      <label for="student-class">組</label>
+      <input type="text" id="student-class" placeholder="例: A, 1, 桜">
+    </div>
+    <div class="form-group">
+      <label for="student-number">出席番号</label>
+      <input type="text" id="student-number" placeholder="例: 15">
+    </div>
+    <div class="form-group">
+      <label for="student-name">氏名</label>
+      <input type="text" id="student-name" placeholder="例: 山田 太郎">
+    </div>
+    <button class="btn-start" onclick="startGame()">クイズスタート</button>
+  </div>
+
+  <!-- 画面2: クイズ画面 -->
+  <div id="screen-quiz" class="hidden">
+    <div class="score-board" id="score-display">正解数: 0 / 0</div>
+    <div class="game-layout">
+      <!-- 左側：解答エリア -->
+      <div class="quiz-area">
+        <div class="jp-question" id="jp-word">日本語単語</div>
+        
+        <div class="answer-display-container" id="answer-container">
+          <!-- 解答文字または下線枠が動的に生成されます -->
+        </div>
+
+        <div class="hint-area" id="hint-display"></div>
+        <div class="letter-buttons" id="buttons-container"></div>
+        <div class="control-btns">
+          <button class="btn-hint" id="btn-show-hint" onclick="enableLengthHint()">💡 文字数ヒント</button>
+          <button class="btn-speech" onclick="speakCurrentWord()">🔊 音声ヒント</button>
+          <button class="btn-clear" onclick="clearInput()">1文字消す</button>
+        </div>
+      </div>
+
+      <!-- 右側：正解テーブル -->
+      <div class="list-area">
+        <h3>正解した単語</h3>
+        <table>
+          <thead>
+            <tr><th>日本語</th><th>英語</th></tr>
+          </thead>
+          <tbody id="solved-table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 画面3: 結果画面 -->
+  <div id="screen-result" class="hidden">
+    <h2>🎉 クイズ終了結果</h2>
+    <div class="result-info">
+      <div><strong>クイズ題名:</strong> <span id="res-title">Lesson 8 Part 1 スペル選択クイズ</span></div>
+      <div><strong>組・番号・氏名:</strong> <span id="res-user"></span></div>
+      <div><strong>終了日時:</strong> <span id="res-date"></span></div>
+    </div>
+
+    <h3>❌ 間違えた単語リスト</h3>
+    <div id="mistake-container">
+      <table class="mistake-list">
+        <thead>
+          <tr><th>日本語</th><th>正解スペル</th><th>間違い回数</th></tr>
+        </thead>
+        <tbody id="mistake-table-body"></tbody>
+      </table>
+    </div>
+
+    <button id="btn-retry-mistakes" class="btn-retry-mistakes hidden" onclick="restartQuizWithMistakes()">❌ 間違えた単語だけやり直す</button>
+    <button class="btn-action" onclick="restartQuizAll()">🔄 もう一度全問挑戦する</button>
+
+    <h3 style="margin-top:25px;">📚 出題単語一覧</h3>
+    <table>
+      <thead>
+        <tr><th>日本語</th><th>英単語</th></tr>
+      </thead>
+      <tbody id="all-words-table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // L8_voclist.xlsx の Part 1 データ
+  const rawVocabData = [
+    { en: "world-famous", jp: "形 世界的に有名な" },
+    { en: "Canadian", jp: "形 カナダ人の" },
+    { en: "formally", jp: "副 公式に" },
+    { en: "chapel", jp: "n 礼拝堂" },
+    { en: "terminal", jp: "n 終着駅" },
+    { en: "civil war", jp: "n 内戦、内乱" },
+    { en: "slave", jp: "n 奴隷" },
+    { en: "slavery", jp: "n 奴隷制度" },
+    { en: "belief", jp: "n 信条、信念" },
+    { en: "hide", jp: "v を隠す" },
+    { en: "barn", jp: "n 納屋" },
+    { en: "church", jp: "n 教会" },
+    { en: "close to", jp: "…にごく近い" },
+    { en: "due to", jp: "…のために" }
+  ];
+
+  let quizQueue = [];
+  let totalQuestions = 0;
+  let solvedCount = 0;
+  let currentItem = null;
+  let currentInput = "";
+  let currentMistakes = 0;
+  let mistakeRecords = {};
+  let currentLetters = [];
+  let clickedButtonIndices = [];
+  let isLengthHintActive = false;
+
+  // ユーザー情報の保存
+  let savedUserInfo = { cls: "", num: "", name: "" };
+
+  // Web Speech API（音声読み上げ用）
+  let englishVoices = [];
+
+  function loadVoices() {
+    if ('speechSynthesis' in window) {
+      const voices = window.speechSynthesis.getVoices();
+      englishVoices = voices.filter(v => v.lang.startsWith('en'));
+    }
+  }
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+  }
+
+  function speakCurrentWord() {
+    if (!currentItem || !('speechSynthesis' in window)) return;
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(currentItem.en);
+    
+    if (englishVoices.length > 0) {
+      // ランダムな英語声（男性・女性・アクセント差異など）を選択
+      const randomVoice = englishVoices[Math.floor(Math.random() * englishVoices.length)];
+      utterance.voice = randomVoice;
+    }
+    
+    // ピッチと速度を少しランダム化して多様性を表現
+    utterance.pitch = 0.8 + Math.random() * 0.5;
+    utterance.rate = 0.85 + Math.random() * 0.2;
+    
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Web Audio API（効果音用）
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playSound(type) {
+    try {
+      initAudio();
+      if (type === 'fanfare') {
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.frequency.value = freq;
+          osc.type = 'triangle';
+          gain.gain.setValueAtTime(0.1, audioCtx.currentTime + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.3);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(audioCtx.currentTime + i * 0.1);
+          osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+        });
+      } else if (type === 'wrong') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(120, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      }
+    } catch (e) {
+      console.log('Audio error:', e);
+    }
+  }
+
+  function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function startGame() {
+    initAudio();
+    const cls = document.getElementById('student-class').value.trim();
+    const num = document.getElementById('student-number').value.trim();
+    const name = document.getElementById('student-name').value.trim();
+
+    if (!cls || !num || !name) {
+      alert("組・番号・氏名を全て入力してください。");
+      return;
+    }
+
+    savedUserInfo = { cls, num, name };
+    startQuizWithList(rawVocabData);
+  }
+
+  function startQuizWithList(wordList) {
+    quizQueue = shuffle([...wordList]);
+    totalQuestions = quizQueue.length;
+    solvedCount = 0;
+    mistakeRecords = {};
+
+    document.getElementById('solved-table-body').innerHTML = "";
+    document.getElementById('screen-input').classList.add('hidden');
+    document.getElementById('screen-result').classList.add('hidden');
+    document.getElementById('screen-quiz').classList.remove('hidden');
+
+    nextQuestion();
+  }
+
+  function nextQuestion() {
+    if (quizQueue.length === 0) {
+      finishQuiz();
+      return;
+    }
+
+    currentItem = quizQueue.shift();
+    currentInput = "";
+    currentMistakes = 0;
+    clickedButtonIndices = [];
+    isLengthHintActive = false;
+
+    document.getElementById('score-display').innerText = `正解数: ${solvedCount} / ${totalQuestions}`;
+    document.getElementById('jp-word').innerText = currentItem.jp;
+    document.getElementById('hint-display').innerText = "";
+    
+    const hintBtn = document.getElementById('btn-show-hint');
+    hintBtn.disabled = false;
+    hintBtn.style.opacity = "1";
+
+    updateInputDisplay();
+
+    // アルファベット生成（正解＋ダミー3文字）
+    const targetLetters = currentItem.en.split('');
+    const dummyAlphabet = "abcdefghijklmnopqrstuvwxyz";
+    const dummies = [];
+    for (let i = 0; i < 3; i++) {
+      const randChar = dummyAlphabet[Math.floor(Math.random() * dummyAlphabet.length)];
+      dummies.push(randChar);
+    }
+
+    currentLetters = shuffle([...targetLetters, ...dummies]);
+    renderButtons();
+  }
+
+  function enableLengthHint() {
+    isLengthHintActive = true;
+    const hintBtn = document.getElementById('btn-show-hint');
+    hintBtn.disabled = true;
+    hintBtn.style.opacity = "0.5";
+    updateInputDisplay();
+  }
+
+  function renderButtons() {
+    const container = document.getElementById('buttons-container');
+    container.innerHTML = "";
+    currentLetters.forEach((char, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'letter-btn';
+      btn.innerText = char === ' ' ? '␣' : char;
+      btn.disabled = clickedButtonIndices.includes(idx);
+      btn.onclick = () => selectLetter(char, idx);
+      container.appendChild(btn);
+    });
+  }
+
+  function selectLetter(char, index) {
+    currentInput += char;
+    clickedButtonIndices.push(index);
+    updateInputDisplay();
+    renderButtons();
+
+    if (currentInput.length === currentItem.en.length) {
+      checkAnswer();
+    }
+  }
+
+  function clearInput() {
+    if (clickedButtonIndices.length > 0) {
+      clickedButtonIndices.pop();
+      currentInput = currentInput.slice(0, -1);
+      updateInputDisplay();
+      renderButtons();
+    }
+  }
+
+  function updateInputDisplay() {
+    const container = document.getElementById('answer-container');
+    container.innerHTML = "";
+
+    if (isLengthHintActive) {
+      const targetLen = currentItem.en.length;
+      for (let i = 0; i < targetLen; i++) {
+        const targetChar = currentItem.en.charAt(i);
+        const box = document.createElement('div');
+        box.className = 'char-box';
+
+        if (targetChar === ' ') {
+          box.classList.add('space-box');
+          box.innerText = '';
+        } else {
+          const inputChar = currentInput.charAt(i) || '';
+          box.innerText = inputChar;
+        }
+        container.appendChild(box);
+      }
+    } else {
+      const textDiv = document.createElement('div');
+      textDiv.className = 'simple-text-display';
+      textDiv.innerText = currentInput || '_';
+      container.appendChild(textDiv);
+    }
+  }
+
+  function checkAnswer() {
+    if (currentInput === currentItem.en) {
+      playSound('fanfare');
+      solvedCount++;
+      addSolvedRow(currentItem.jp, currentItem.en);
+
+      setTimeout(() => {
+        nextQuestion();
+      }, 500);
+    } else {
+      playSound('wrong');
+      currentMistakes++;
+
+      if (!mistakeRecords[currentItem.en]) {
+        mistakeRecords[currentItem.en] = { jp: currentItem.jp, count: 0 };
+      }
+      mistakeRecords[currentItem.en].count++;
+
+      if (currentMistakes === 1) {
+        document.getElementById('hint-display').innerText = `💡 ヒント: 1文字目は "${currentItem.en.charAt(0)}"`;
+      } else if (currentMistakes >= 2) {
+        document.getElementById('hint-display').innerText = `💡 ヒント: 1~2文字目は "${currentItem.en.substring(0, 2)}"`;
+      }
+
+      setTimeout(() => {
+        currentInput = "";
+        clickedButtonIndices = [];
+        updateInputDisplay();
+        renderButtons();
+      }, 600);
+    }
+  }
+
+  function addSolvedRow(jp, en) {
+    const tbody = document.getElementById('solved-table-body');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${jp}</td><td><strong>${en}</strong></td>`;
+    tbody.appendChild(tr);
+  }
+
+  function finishQuiz() {
+    document.getElementById('screen-quiz').classList.add('hidden');
+    document.getElementById('screen-result').classList.remove('hidden');
+
+    let cls = savedUserInfo.cls;
+    if (!cls.endsWith('組')) {
+      cls += '組';
+    }
+    const num = savedUserInfo.num;
+    const name = savedUserInfo.name;
+    const now = new Date();
+
+    document.getElementById('res-user').innerText = `${cls} ${num}番 ${name}`;
+    document.getElementById('res-date').innerText = now.toLocaleString('ja-JP');
+
+    // 間違えた単語リストの描画
+    const mistakeTbody = document.getElementById('mistake-table-body');
+    mistakeTbody.innerHTML = "";
+    const mistakeKeys = Object.keys(mistakeRecords);
+    const retryMistakesBtn = document.getElementById('btn-retry-mistakes');
+
+    if (mistakeKeys.length === 0) {
+      mistakeTbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#27ae60;">パーフェクト！ミスなく全問正解しました！</td></tr>`;
+      retryMistakesBtn.classList.add('hidden');
+    } else {
+      mistakeKeys.forEach(key => {
+        const item = mistakeRecords[key];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${item.jp}</td><td><strong>${key}</strong></td><td>${item.count}回</td>`;
+        mistakeTbody.appendChild(tr);
+      });
+      retryMistakesBtn.classList.remove('hidden');
+    }
+
+    // 全単語リストの描画
+    const allTbody = document.getElementById('all-words-table-body');
+    allTbody.innerHTML = "";
+    rawVocabData.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${item.jp}</td><td><strong>${item.en}</strong></td>`;
+      allTbody.appendChild(tr);
+    });
+  }
+
+  function restartQuizAll() {
+    startQuizWithList(rawVocabData);
+  }
+
+  function restartQuizWithMistakes() {
+    const mistakeKeys = Object.keys(mistakeRecords);
+    const mistakeList = rawVocabData.filter(item => mistakeKeys.includes(item.en));
+    if (mistakeList.length > 0) {
+      startQuizWithList(mistakeList);
+    }
+  }
+</script>
+</body>
+</html>
